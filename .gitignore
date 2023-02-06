@@ -1,0 +1,19 @@
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.synctex.gz
+*.pdf
+*.out
+*.dvi
+_minted*
+
+# Image files
+*.png
+*.pdf_tex
+
+# Rust
+target/
+
+# Python
+__pycache__/
