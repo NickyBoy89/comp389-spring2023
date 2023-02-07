@@ -131,7 +131,7 @@ Elise Corwin (), Jadriel Delim ()}
         message that had identical shifts.
 
       \item Repeat part (a) for the Vigen\`ere cipher using period 2, using 
-        period 3, and using period 4.
+        period 3, and using period 4. \textbf{FIXME}
     \end{enumerate}
   \item Prove or refute:
     \begin{enumerate}
@@ -140,81 +140,73 @@ Elise Corwin (), Jadriel Delim ()}
         $\mathcal{M}$, every $m_0, m_1 \in M$, and every $c \in C$ we have 
         $Pr\left[M = m_0 \mid C = c\right] = Pr\left[M = m_1 \mid C = c\right]$.
 
+        \begin{proof}
+        We will refute the forward direction of the biconditional. Consider $\pi$(Gen, Enc, Dec), a perfectly secret encryption scheme. \newline
+
+        Suppose $\pi$ has a message space $\mathcal{M}$ with two messages $m_0$ and $m_1$. We are given that any message space $\mathcal{M}$ should be satisfied. Assign
+        
+        $Pr[M = m_0] \neq Pr[M = m_1]$ such that $Pr[M = m_0] + Pr[M = m_1] = 1$.\newline
+
+        Now $\mathcal{M} = 
+        Pr(m_0) = \alpha$,
+        $Pr(m_1) = \beta$ 
+        for some $\alpha, \beta \in \{0, 1\}, \alpha \neq \beta$. \newline
+
+        By the definition of perfect secrecy,
+
+        $Pr[M = m | C = c) = P(M = m]$\newline
+
+        This implies that $Pr[M = m_0 | C = c] = Pr[M = m_0]$ and $Pr[M = m_1 | C = c] = Pr[M = m_1]$. We then find that $Pr[M = m_0 \mid C = c] =
+          Pr[M = m_0] \neq Pr[M = m_1] = Pr[M = m_1 \mid C = c]$ by the current probability distribution. This contradicts the initial assumption that $Pr[M = m_1 | C = c] = Pr[M = m_1 \mid C = c]$
+        
+        \end{proof}
+
       \item An encryption scheme with message space M is perfectly secret if and 
         only if for every probability distribution over $\mathcal{M}$ and every
         $c_0, c_1 \in C$ 
         we have $Pr\left[C = c_0\right] = Pr\left[C = c_1\right]$.
+
+        \textbf{FIXME}
+        
     \end{enumerate}
   \item The first definition we gave in class to define perfect secrecy is as follows
     \begin{enumerate}
-      \item Prove that Definition 1 implies Definition 2
+      \item Prove that Definition 1 implies Definition 2.
 
         \begin{proof}
-          We have some perfectly secret encryption scheme over some message 
-          space $\mathcal{M}$, and we generate a pair of messages 
-          $m_0, m_1 \in \mathcal{M}$.
+          We have some perfectly secret encryption scheme $\pi$(Gen, Enc, Dec) over some message 
+          space $\mathcal{M}$. We generate a pair of messages 
+          $m_0, m_1 \in \mathcal{M}$.\newline
 
-          Due to $\mathcal{M}$ being perfectly secret, we have that
+          Choose a random bit b $\leftarrow \{0, 1\}$. This bit is used as an argument to the encryption function $Enc_k(m, b)$ and given to an adversary $\mathcal{A}$ who wants to guess whether $m_0$ or $m_1$ was being encrypted. Because the encryption scheme is perfectly secret, we know that the ciphertext does not leak any additional information about the plaintext, which means that $\mathcal{A}$'s guess $b' \in \left\{0, 1\right\}$ is also random.\newline
+          
+            Due to the partition of probabilities, we have that
           \[
-            Pr[\mathcal{M} = m_0] = Pr[\mathcal{M} = m_1]
+            \sum\limits_i Pr[M = m_i] =  
+            Pr[\text{PrivK}_{\mathcal{M}, \Pi}^{\text{eav}} = 1] + 
+            Pr[\text{PrivK}_{\mathcal{M}, \Pi}^{\text{eav}} = 0] = 1
           \]
+          
+          Since $\mathcal{A}$'s guess of $b' \in \left\{0, 1\right\}$ is effectively random, it agrees with $b$ exactly half of the time. This implies the following: 
 
-          Due to the partition of probabilities rule, we also find that
-          $\sum\limits_{i} Pr[m_i] = 1$, i.e.
           \[
-            Pr[\mathcal{M} = m_0] + Pr[\mathcal{M} = m_1] = 1
+            Pr[\text{PrivK}_{\mathcal{M}, \Pi}^{\text{eav}} = 1] = \frac{1}{2}
           \]
-
-          Thus, we have
-          \begin{align*}
-            Pr[\mathcal{M} = m_0] + Pr[\mathcal{M} = m_1] &= 1\\
-            Pr[\mathcal{M} = m_1] + Pr[\mathcal{M} = m_1] &= 1\\
-            2Pr[\mathcal{M} = m_1] &= 1\\
-            Pr[\mathcal{M} = m_1] &= \frac{1}{2}\\
-          \end{align*}
+         
         \end{proof}
 
       \item Prove that Definition 2 implies Definition 1
         
         \begin{proof}
-          Generate a pair of messages $m_0, m_1 \in \mathcal{M}$.
 
-          Choose some bit $b \in \left\{0, 1\right\}$, and encrypt some message
-          $m_b$ with key $k$. Then, guess some random bit 
-          $b' \in \left\{0, 1\right\}$.
-
-          Thus, we have that
-          \[
+            We are given that
+            \[
             Pr[\text{PrivK}_{\mathcal{M}, \Pi}^{\text{eav}} = 1] = \frac{1}{2}
           \]
 
-          Due to the partition of probabilities, we have that
-          \[
-            \sum\limits_i Pr[\mathcal{M} = m_i] =  
-            Pr[\text{PrivK}_{\mathcal{M}, \Pi}^{\text{eav}} = 1] + 
-            Pr[\text{PrivK}_{\mathcal{M}, \Pi}^{\text{eav}} = 0] = 1
-          \]
+            This implies that every adversary has a 50\% chance of outputting 1. By definition, this percentage means that $\mathcal{A}$'s guess $b' \in \left\{0, 1\right\}$ agrees with b $\leftarrow \{0, 1\}$ half the time. This frequency only occurs if the ciphertext does not affect $\mathcal{A}$'s knowledge of the message probability. As a result, $Pr[M = m_0 | C = c] = Pr[M = m_0] = Pr[M = m_1] = Pr[M = m_1 | C = c]$, which is the definition of perfect secrecy.
 
-          Finally, we find that
-          \begin{align*}
-            Pr[\text{PrivK}_{\mathcal{M}, \Pi}^{\text{eav}} = 1] + 
-            Pr[\text{PrivK}_{\mathcal{M}, \Pi}^{\text{eav}} = 0] &= 1\\
-            \frac{1}{2} + Pr[\text{PrivK}_{\mathcal{M}, \Pi}^{\text{eav}} = 0] &= 1\\
-            Pr[\text{PrivK}_{\mathcal{M}, \Pi}^{\text{eav}} = 0] &= \frac{1}{2}
-          \end{align*}
-
-          Substituting this back into the original function, we get that
-          \begin{align*}
-            Pr[\text{PrivK}_{\mathcal{M}, \Pi}^{\text{eav}} = 1] 
-            + \frac{1}{2} &= 1\\
-                          &= \frac{1}{2}
-          \end{align*}
-
-          Since we find that $Pr[\text{PrivK}_{\mathcal{M}, \Pi}^{\text{eav}} =
-          1] = \frac{1}{2} = Pr[\text{PrivK}_{\mathcal{M}, \Pi}^{\text{eav}} =
-          0]$, the message space $\mathcal{M}$ must be perfectly secret, due to
-          the definition of perfectly secret.
-        \end{proof}
+          \end{proof}
     \end{enumerate}
 \end{enumerate}
 
