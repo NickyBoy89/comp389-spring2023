@@ -140,6 +140,20 @@ Elise Corwin (), Jadriel Delim ()}
         $\mathcal{M}$, every $m_0, m_1 \in M$, and every $c \in C$ we have 
         $Pr\left[M = m_0 \mid C = c\right] = Pr\left[M = m_1 \mid C = c\right]$.
 
+        \begin{proof}
+          Define a perfectly secret message space $\mathcal{M}$ with a pair of messages $m_0,
+          m_1$.
+
+          Suppose $Pr[M = m_0] \neq Pr[M = m_1]$, where
+          $Pr[M = m_0] + Pr[M = m_1] = 1$.
+
+          By perfect secrecy, we have that $Pr[M = m_0 \mid C = c] =
+          Pr[M = m_0] \neq Pr[M = m_1] + Pr[M = m_1 \mid C = c]$.
+
+          However, we find that $Pr[M = m_0] = Pr[M = m_1]$, which is a
+          contradiction for the fact that $Pr[M = m_0] \neq Pr[M = m_1]$.
+        \end{proof}
+
       \item An encryption scheme with message space M is perfectly secret if and 
         only if for every probability distribution over $\mathcal{M}$ and every
         $c_0, c_1 \in C$ 
