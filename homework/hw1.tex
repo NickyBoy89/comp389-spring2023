@@ -24,11 +24,10 @@ Elise Corwin (), Jadriel Delim ()}
     encrypted using the $i$th permutation. Show how to break this version of 
     the cipher.\\
 
-    Assume we know the plaintext, ciphertext, and the length of the key $k$
-    such that $\text{len}(k) = l$.
+    First, we make a guess for the length of the key, $l = \vert k\vert$.
 
-    Divide the plaintext into $l$ different substitution ciphers according to
-    the positions of the characters (Every $l$th character).
+    Divide the ciphertext into $l$ different substitution ciphers according to
+    the positions of the characters (every $l$th character).
 
     For example, for a key with a length of $3$, the method would visually
     look like:
@@ -38,13 +37,16 @@ Elise Corwin (), Jadriel Delim ()}
       \includegraphics{improved-vigenere-split-diagram.pdf}
     \end{figure}
 
-    From there, we can use the original ciphertext inside each group, and do a
-    normal decode for a substitution cipher. We then get an individual key
-    $k_i$, which is some permutation of the alphabet.
+    From there, we can run frequency analysis on each group, and determine if
+    they have a distribution similar to English. From within each group, we can
+    get a guess on an individual alphabet for the cipher $k_i$.
+
+    Then, repeat this with multiple values for the guesses on the key length $l$,
+    until we find a set of alphabet permutations that seems the most likely.
 
     From there, the original key $k$ can be found by grouping up all the 
-    individual permutations of the individual alphabets $k_i$ in every group.
-
+    individual permutations of the individual alphabet guesses $k_i$ in every 
+    group.
 
   \item A Known-Plaintext Attack is an attack scenario where the adversary 
     learns one or more pairs of plaintexts/ciphertexts encrypted under the same
