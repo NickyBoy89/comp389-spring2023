@@ -98,7 +98,7 @@ Elise Corwin (), Jadriel Delim ()}
 
         Thus, to find the entire alphabet of shifts, we need a message that
         contains every character in the alphabet.
-      \item Show that the Vigen\'ere cipher is trivial to break
+      \item Show that the Vigen\'ere cipher is trivial to break.
 
         We have some message $m$, and the ciphertext $c$. For every $i$th
         character in the message $m_i$, we can get its individual shift $k_i$ by
@@ -134,6 +134,15 @@ Elise Corwin (), Jadriel Delim ()}
 
       \item Repeat part (a) for the Vigen\`ere cipher using period 2, using 
         period 3, and using period 4.
+
+        For period 2 the difference of the distances between ab and cd are equal to the difference of the distances of be and dg. Since these differences are the same causing the same key used in the ciphertext generation,  it is possible that the ciphertexts are the same thus the adversary does not know which password was encrypted. 
+
+       
+        For period 3 the same notion applies as above since the distance between 'abc' is the same as the difference in the distances betweeen 'bed'.
+
+
+        For period 4 since we know the length of the plaintext and ciphertext is 4, we can use a length 4 key such as 'cafe' to determine if the resulting plaintext from decoding the ciphertext has 4 unique shift values. If the values are unique this could be a possible password. But, you should check the plaintext/ciphertext pair using the key to decrypt. If these shift values are also unique it is unclear as to which password is correct. 
+
     \end{enumerate}
   \item Prove or refute:
     \begin{enumerate}
