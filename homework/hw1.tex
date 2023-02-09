@@ -24,11 +24,10 @@ Elise Corwin (), Jadriel Delim ()}
     encrypted using the $i$th permutation. Show how to break this version of 
     the cipher.\\
 
-    Assume we know the plaintext, ciphertext, and the length of the key $k$
-    such that $\text{len}(k) = l$.
+    First, we make a guess for the length of the key, $l = \vert k\vert$.
 
-    Divide the plaintext into $l$ different substitution ciphers according to
-    the positions of the characters (Every $l$th character).
+    Divide the ciphertext into $l$ different substitution ciphers according to
+    the positions of the characters (every $l$th character).
 
     For example, for a key with a length of $3$, the method would visually
     look like:
@@ -38,13 +37,16 @@ Elise Corwin (), Jadriel Delim ()}
       \includegraphics{improved-vigenere-split-diagram.pdf}
     \end{figure}
 
-    From there, we can use the original ciphertext inside each group, and do a
-    normal decode for a substitution cipher. We then get an individual key
-    $k_i$, which is some permutation of the alphabet.
+    From there, we can run frequency analysis on each group, and determine if
+    they have a distribution similar to English. From within each group, we can
+    get a guess on an individual alphabet for the cipher $k_i$.
+
+    Then, repeat this with multiple values for the guesses on the key length $l$,
+    until we find a set of alphabet permutations that seems the most likely.
 
     From there, the original key $k$ can be found by grouping up all the 
-    individual permutations of the individual alphabets $k_i$ in every group.
-
+    individual permutations of the individual alphabet guesses $k_i$ in every 
+    group.
 
   \item A Known-Plaintext Attack is an attack scenario where the adversary 
     learns one or more pairs of plaintexts/ciphertexts encrypted under the same
@@ -96,7 +98,7 @@ Elise Corwin (), Jadriel Delim ()}
 
         Thus, to find the entire alphabet of shifts, we need a message that
         contains every character in the alphabet.
-      \item Show that the Vigen\'ere cipher is trivial to break
+      \item Show that the Vigen\'ere cipher is trivial to break.
 
         We have some message $m$, and the ciphertext $c$. For every $i$th
         character in the message $m_i$, we can get its individual shift $k_i$ by
@@ -132,6 +134,14 @@ Elise Corwin (), Jadriel Delim ()}
 
       \item Repeat part (a) for the Vigen\`ere cipher using period 2, using 
         period 3, and using period 4.
+
+        For period 2 the difference of the distances between ab and cd are equal to the difference of the distances of be and dg. Since these differences are the same causing the same key used in the ciphertext generation,  it is possible that the ciphertexts are the same thus the adversary does not know which password was encrypted. 
+
+       
+        For period 3 the same notion applies as above since the distance between 'abc' is the same as the difference in the distances betweeen 'bed'.
+
+
+        For period 4 since we know the length of the plaintext and ciphertext is 4, we can use a length 4 key such as 'cafe' to determine if the resulting plaintext from decoding the ciphertext has 4 unique shift values. If the values are unique this could be a possible password. But, you should check the plaintext/ciphertext pair using the key to decrypt. If these shift values are also unique it is unclear as to which password is correct. 
     \end{enumerate}
   \item Prove or refute:
     \begin{enumerate}
@@ -140,81 +150,100 @@ Elise Corwin (), Jadriel Delim ()}
         $\mathcal{M}$, every $m_0, m_1 \in M$, and every $c \in C$ we have 
         $Pr\left[M = m_0 \mid C = c\right] = Pr\left[M = m_1 \mid C = c\right]$.
 
+        \begin{proof}
+        We will refute the forward direction of the biconditional. Consider $\pi$(Gen, Enc, Dec), a perfectly secret encryption scheme. \newline
+
+        Suppose $\pi$ has a message space $\mathcal{M}$ with two messages $m_0$ and $m_1$. We are given that any message space $\mathcal{M}$ should be satisfied. Assign
+        
+        $Pr[M = m_0] \neq Pr[M = m_1]$ such that $Pr[M = m_0] + Pr[M = m_1] = 1$.\newline
+
+        Now $\mathcal{M} = 
+        Pr(m_0) = \alpha$,
+        $Pr(m_1) = \beta$ 
+        for some $\alpha, \beta \in (0, 1), \alpha \neq \beta$. \newline
+
+        By the definition of perfect secrecy,
+
+        $Pr[M = m | C = c) = P(M = m]$\newline
+
+        This implies that $Pr[M = m_0 | C = c] = Pr[M = m_0]$ and $Pr[M = m_1 | C = c] = Pr[M = m_1]$. We then find that $Pr[M = m_0 \mid C = c] =
+          Pr[M = m_0] \neq Pr[M = m_1] = Pr[M = m_1 \mid C = c]$ by the current probability distribution. This contradicts the initial assumption that $Pr[M = m_1 | C = c] = Pr[M = m_1 \mid C = c]$
+        
+        \end{proof}
+
       \item An encryption scheme with message space M is perfectly secret if and 
         only if for every probability distribution over $\mathcal{M}$ and every
         $c_0, c_1 \in C$ 
         we have $Pr\left[C = c_0\right] = Pr\left[C = c_1\right]$.
+
+        This is an attempt.
+
+        Prove the backwards direction:
+
+        \begin{proof}
+        Given that $Pr\left[C = c_0\right] = Pr\left[C = c_1\right]$, prove that the encryption scheme $\mathcal{M}$ is perfectly secret.\\
+
+        Because $Pr\left[C = c_0\right] = Pr\left[C = c_1\right]$, any given ciphertext is equally likely to occur as any other ciphertext $c \in \mathcal{C}$. This means that the ciphertext doesn't give any information about the message, so $Pr[M = m] = Pr[M = m | C = C_0] = Pr[M = m | C = C_1]$. In general, we have an even partition where any $C_i, i \in \mathcal{C}$ is as likely to occur as any other $C_i$. As a result, $Pr[M = m | C = C_i, i \in \{0, n\} = Pr[M = m]$. This implies perfect secrecy.
+        \end{proof}
+
+        Prove the forwards direction:
+
+        \begin{proof}
+        Given the definition of perfect secrecy,  $Pr[M = m | C = c] = Pr[M = m]$. This is true for any ciphertext c $\in \mathcal{C}$, which implies that $Pr[M = m] = Pr[M = m | C = C_0] = Pr[M = m | C = C_1]$.
+
+        Use the equality $[P[A | B] = P[A \cap B] / P[B]$. 
+
+        \begin{align*}
+            P[M = m | C = c_0] = P[M = m \cap C = c_0] / P[c_0]
+        \end{align*}
+
+        \begin{align*}
+            P[M = m | C = c_1] = P[M = m \cap C = c_1] / P[c_1]
+        \end{align*}
+
+        The denominators are the same because any ciphertext is equally likely to occur, so the numerators are also the same. As a result, we have shown $P[M = m | C = c_0] = P[M = m | C = c_1]$.
+        
+        \end{proof}
+        
     \end{enumerate}
   \item The first definition we gave in class to define perfect secrecy is as follows
     \begin{enumerate}
-      \item Prove that Definition 1 implies Definition 2
+      \item Prove that Definition 1 implies Definition 2.
 
         \begin{proof}
-          We have some perfectly secret encryption scheme over some message 
-          space $\mathcal{M}$, and we generate a pair of messages 
-          $m_0, m_1 \in \mathcal{M}$.
+          We have some perfectly secret encryption scheme $\pi$(Gen, Enc, Dec) over some message 
+          space $\mathcal{M}$. We generate a pair of messages 
+          $m_0, m_1 \in \mathcal{M}$.\newline
 
-          Due to $\mathcal{M}$ being perfectly secret, we have that
+          Choose a random bit b $\leftarrow \{0, 1\}$. This bit is used as an argument to the encryption function $Enc_k(m, b)$ and given to an adversary $\mathcal{A}$ who wants to guess whether $m_0$ or $m_1$ was being encrypted. Because the encryption scheme is perfectly secret, we know that the ciphertext does not leak any additional information about the plaintext, which means that $\mathcal{A}$'s guess $b' \in \left\{0, 1\right\}$ is also random.\newline
+          
+            Due to the partition of probabilities, we have that
           \[
-            Pr[\mathcal{M} = m_0] = Pr[\mathcal{M} = m_1]
+            \sum\limits_i Pr[M = m_i] =  
+            Pr[\text{PrivK}_{\mathcal{M}, \Pi}^{\text{eav}} = 1] + 
+            Pr[\text{PrivK}_{\mathcal{M}, \Pi}^{\text{eav}} = 0] = 1
           \]
+          
+          Since $\mathcal{A}$'s guess of $b' \in \left\{0, 1\right\}$ is effectively random, it agrees with $b$ exactly half of the time. This implies the following: 
 
-          Due to the partition of probabilities rule, we also find that
-          $\sum\limits_{i} Pr[m_i] = 1$, i.e.
           \[
-            Pr[\mathcal{M} = m_0] + Pr[\mathcal{M} = m_1] = 1
+            Pr[\text{PrivK}_{\mathcal{M}, \Pi}^{\text{eav}} = 1] = \frac{1}{2}
           \]
-
-          Thus, we have
-          \begin{align*}
-            Pr[\mathcal{M} = m_0] + Pr[\mathcal{M} = m_1] &= 1\\
-            Pr[\mathcal{M} = m_1] + Pr[\mathcal{M} = m_1] &= 1\\
-            2Pr[\mathcal{M} = m_1] &= 1\\
-            Pr[\mathcal{M} = m_1] &= \frac{1}{2}\\
-          \end{align*}
+         
         \end{proof}
 
       \item Prove that Definition 2 implies Definition 1
         
         \begin{proof}
-          Generate a pair of messages $m_0, m_1 \in \mathcal{M}$.
 
-          Choose some bit $b \in \left\{0, 1\right\}$, and encrypt some message
-          $m_b$ with key $k$. Then, guess some random bit 
-          $b' \in \left\{0, 1\right\}$.
-
-          Thus, we have that
-          \[
+            We are given that
+            \[
             Pr[\text{PrivK}_{\mathcal{M}, \Pi}^{\text{eav}} = 1] = \frac{1}{2}
           \]
 
-          Due to the partition of probabilities, we have that
-          \[
-            \sum\limits_i Pr[\mathcal{M} = m_i] =  
-            Pr[\text{PrivK}_{\mathcal{M}, \Pi}^{\text{eav}} = 1] + 
-            Pr[\text{PrivK}_{\mathcal{M}, \Pi}^{\text{eav}} = 0] = 1
-          \]
+            This implies that every adversary has a 50\% chance of outputting 1. By definition, this percentage means that $\mathcal{A}$'s guess $b' \in \left\{0, 1\right\}$ agrees with b $\leftarrow \{0, 1\}$ half the time. This frequency only occurs if the ciphertext does not affect $\mathcal{A}$'s knowledge of the message probability. As a result, $Pr[M = m_0 | C = c] = Pr[M = m_0] = Pr[M = m_1] = Pr[M = m_1 | C = c]$, which is the definition of perfect secrecy.
 
-          Finally, we find that
-          \begin{align*}
-            Pr[\text{PrivK}_{\mathcal{M}, \Pi}^{\text{eav}} = 1] + 
-            Pr[\text{PrivK}_{\mathcal{M}, \Pi}^{\text{eav}} = 0] &= 1\\
-            \frac{1}{2} + Pr[\text{PrivK}_{\mathcal{M}, \Pi}^{\text{eav}} = 0] &= 1\\
-            Pr[\text{PrivK}_{\mathcal{M}, \Pi}^{\text{eav}} = 0] &= \frac{1}{2}
-          \end{align*}
-
-          Substituting this back into the original function, we get that
-          \begin{align*}
-            Pr[\text{PrivK}_{\mathcal{M}, \Pi}^{\text{eav}} = 1] 
-            + \frac{1}{2} &= 1\\
-                          &= \frac{1}{2}
-          \end{align*}
-
-          Since we find that $Pr[\text{PrivK}_{\mathcal{M}, \Pi}^{\text{eav}} =
-          1] = \frac{1}{2} = Pr[\text{PrivK}_{\mathcal{M}, \Pi}^{\text{eav}} =
-          0]$, the message space $\mathcal{M}$ must be perfectly secret, due to
-          the definition of perfectly secret.
-        \end{proof}
+          \end{proof}
     \end{enumerate}
 \end{enumerate}
 
