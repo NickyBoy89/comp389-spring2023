@@ -1,0 +1,106 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+
+\newtheorem{definition}{Definition}
+
+\title{Homework 2}
+\date{7 March 2023}
+\author{Nicholas Novak (), Yash Karandikar (),
+Elise Corwin (), Jadriel Delim ()}
+
+\begin{document}
+\maketitle
+
+\begin{enumerate}
+  \item Let $F$ be a keyed function and consider the following experiment:
+
+    \textbf{The PRF indistinguishability experiment} $\text{PRF}_{\mathcal{A},
+    F}(n)$:
+
+    \begin{enumerate}
+      \item[(i)] A uniform bit $b \in \left\{0, 1\right\}$ is chosen. If $b = 1$ then
+        choose uniform $k \in \left\{0, 1\right\}^n$.
+      \item[(ii)] $\mathcal{A}$ is given $1^n$ for input. If $b = 0$ then
+        $\mathcal{A}$ is given access to a uniform function $f \in
+        \text{Func}_n$. If $b = 1$ then $\mathcal{A}$ is instead given access to
+        $F_k(\cdot)$.
+      \item[(iii)] $\mathcal{A}$ outputs a bit $b'$.
+      \item[(iv)] The output of the experiment is defined to be 1 if $b' = b$, and $0$
+        otherwise.
+    \end{enumerate}
+
+    Define pseudorandom functions using this experiment, and prove that your
+    definition is equivalent to the following definition we've seen in class.
+
+    \begin{definition}
+      Let $F : \left\{0, 1\right\}^* \times \left\{0, 1\right\}^* \to \left\{0,
+      1\right\}^*$ \textit{be an efficient, length-preserving keyed function.}
+      $F$ \textit{is \textbf{pseudorandom function} if for all probabilistic
+        polynomial-time distinguishers D, there is a negligible function
+      \textbf{negl} such that:}
+
+      \[
+        \left| \Pr\left[D^{F_k(\cdot)}(1^n) = 1\right] -
+      \Pr\left[D^{f(\cdot)}(1^n) = 1\right] \right| \leq \text{negl}(n),
+      \]
+
+      \textit{where the first probability is taken over uniform choice of $k \in
+        \left\{0, 1\right\}^n$ and the randomness of $D$, and the second
+        probability is taken over uniform choice of $f \in \text{Func}_n$ and
+      randomness of $D$.}
+    \end{definition}
+  \item Define a notion of perfect secrecy under a chosen-plaintext attack by
+    adapting the following definition we've seen in class.
+
+    \begin{definition}
+      \textit{A private-key encryption scheme $\Pi = (\textbf{Gen}, \textbf{Enc},
+        \textbf{Dec})$ has \textbf{indistinguishable encryptions under a
+        chosen-plaintext attack}, or is \textbf{CPA-secure}, if for all
+        probailistic polynomial time adversaries $\mathcal{A}$ there is a
+      negligible function \textbf{negl} such that}
+
+        \[
+          \Pr\left[\text{PrivK}_{\mathcal{A}, \Pi}^\text{cpa}(n) = 1\right] \leq
+          \frac{1}{2} + \textbf{negl}(n),
+        \]
+
+        \textit{where the probability is taken over the randomness used by
+        $\mathcal{A}$, as well as the randomness used in the experiment.}
+
+        \textit{Show that the definition cannot be achieved.}
+    \end{definition}
+  \item Let $F$ be a pseudorandom permutation, and define a fixed-length
+    encryption scheme $(\text{Enc}, \text{Dec})$ as follows: On input $m \in
+    \left\{0, 1\right\}^{n / 2}$ and key $k \in \left\{0, 1\right\}^n$,
+    algorithm \textbf{Enc} chooses a uniform string $r \in \left\{0,
+    1\right\}^{n/2}$ of length $n/2$ and computes $c := F_k(r \Vert m)$.
+
+    Show how to decrypt, and prove that this scheme is CPA-secure for
+    messages of length $n / 2$.
+  \item Let $F$ be a pseudorandom function and $G$ be a pseudorandom generator
+    with expansion factor $l(n) = n + 1$. For each of the following encryption
+    schemes, state whether the scheme has indistinguishable encryptions in the
+    presence of an eavesdropper and whether it is CPA-secure.
+
+    (In each case, the shared key is a uniform $k \in \left\{0, 1\right\}^n$.)
+    Explain your answer.
+
+    \begin{enumerate}
+      \item To encrypt $m \in \left\{0, 1\right\}^{n + 1}$, choose uniform $r
+        \in \left\{0, 1\right\}^n$ and output the ciphertext $\left\langle r,
+          G(r) \oplus m\right\rangle$.
+        \item To encrypt $m \in \left\{0, 1\right\}^n$, output the ciphertext $m
+          \oplus F_k(0^n)$.
+        \item To encrypt $m \in \left\{0, 1\right\}^{2n}$, parse $m$ as $m_1
+          \Vert m_2$ with $| m_1 | = | m_2 |$, then choose uniform
+          $r \in \left\{0, 1\right\}^n$ and send $\left\langle r, m_1 \oplus
+          F_k(r), m_2 \oplus F_k(r + 1)\right\rangle$.
+    \end{enumerate}
+  \item Show that the CBC and CTR modes of operation do not yield CCA-secure
+    encryption schemes (regardless of $F$).
+\end{enumerate}
+
+\end{document}
