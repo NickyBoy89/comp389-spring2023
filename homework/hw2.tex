@@ -1,5 +1,6 @@
 \documentclass{article}
 
+\usepackage{amsthm}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage[a4paper, total={6in, 8in}]{geometry}
@@ -8,6 +9,7 @@
 
 \DeclareMathOperator{\PRF}{\textsf{PRF}}
 \DeclareMathOperator{\Func}{\textsf{Func}}
+\DeclareMathOperator{\negl}{\textsf{negl}}
 \DeclareMathOperator{\PrivK}{\textsf{PrivK}}
 \DeclareMathOperator{\Gen}{\textsf{Gen}}
 \DeclareMathOperator{\Enc}{\textsf{Enc}}
@@ -79,11 +81,23 @@ Elise Corwin (), Jadriel Delim ()}
 
         \textit{Show that the definition cannot be achieved.}
     \end{definition}
+
   \item Let $F$ be a pseudorandom permutation, and define a fixed-length
     encryption scheme $(\Enc, \Dec)$ as follows: On input $m \in
     \left\{0, 1\right\}^{n / 2}$ and key $k \in \left\{0, 1\right\}^n$,
     algorithm $\Enc$ chooses a uniform string $r \in \left\{0,
     1\right\}^{n/2}$ of length $n/2$ and computes $c := F_k(r \Vert m)$.
+
+    How to decrypt:
+
+    \begin{align*}
+      c &= F_k(r \Vert m)\\
+    \end{align*}
+    \begin{align*}
+      r \Vert m &= F^{-1}_k(c)\\
+    \end{align*}
+
+    Now, we can get $m$ by cutting off the first $n / 2$ bits of $r \Vert m$.
 
     Show how to decrypt, and prove that this scheme is CPA-secure for
     messages of length $n / 2$.
@@ -95,19 +109,88 @@ Elise Corwin (), Jadriel Delim ()}
     (In each case, the shared key is a uniform $k \in \left\{0, 1\right\}^n$.)
     Explain your answer.
 
+    % https://crypto.stackexchange.com/questions/31309/given-a-pseudorandom-function-f-is-f-kr-f-kr-1-also-a-prf?rq=1
+
     \begin{enumerate}
       \item To encrypt $m \in \left\{0, 1\right\}^{n + 1}$, choose uniform $r
         \in \left\{0, 1\right\}^n$ and output the ciphertext $\left\langle r,
           G(r) \oplus m\right\rangle$.
+
+          \begin{proof}
+            $G$ does not use a key that changes between functions, it is
+            deterministic.
+
+            Since the attacker has access to $G$, and can find the $r$ via the
+            first $n / 2$ bits of the ciphertext, we can decrypt the function
+            with a $\Pr = 1$.
+
+            Therefore, it is neither EAV-secure, nor CPA-secure.
+          \end{proof}
+
         \item To encrypt $m \in \left\{0, 1\right\}^n$, output the ciphertext $m
           \oplus F_k(0^n)$.
+
+          \begin{proof}
+            In the CPA-security experiment, we have access to some decryption
+            oracle for $K_k$.
+
+            However, since the value to $K$ is just a unary string of length
+            $n$, once we observe the output for $F_k(0^n)$ for one message of
+            length $n$, we can query the decryption oracle with the same unary
+            string of length $n$, and XOR that with the ciphertext to get the
+            message. Therefore, this scheme is not CPA-secure.
+
+            However, for EAV-security, consider the case where the pseudorandom
+            function $F_k$ is replaced by a random function $f \in \Func_n$.
+
+            If this is the case, we get some random pad.
+
+            Create some distinguisher $D$:
+
+            Choose two messages $m_0, m_1 \in \left\{0, 1\right\}^n$. Now, we
+            will see if $D$ can distinguish between them with non-negligible
+            probability, which will contradict our assumption that $F_k$ is a
+            random function.
+
+            Choose some uniform bit $b \in \left\{0, 1\right\}$.
+
+            Use the encryption oracle $\mathcal{O}$ to encrypt the message
+            $m_b$. If $\mathcal{O} = f$ is a random function, the probability of
+            success will be $\frac{1}{2}$. However, if $\mathcal{O} = F_k$, then
+            due to the definition of pseudorandom, $D$ will succeed with a
+            probability of $\frac{1}{2} + \negl$, which does not contradict our
+            initial assumption.
+
+            Therefore, the scheme is EAV-secure, but not CPA-secure.
+          \end{proof}
+
         \item To encrypt $m \in \left\{0, 1\right\}^{2n}$, parse $m$ as $m_1
           \Vert m_2$ with $| m_1 | = | m_2 |$, then choose uniform
           $r \in \left\{0, 1\right\}^n$ and send $\left\langle r, m_1 \oplus
           F_k(r), m_2 \oplus F_k(r + 1)\right\rangle$.
+
+          % Proof Idea:
+          % Use a random function f instead of a F_k
+          % if the distinguisher can tell the difference, then it is not
+          % CPA-secure
+          %
+          % Also, if something is CPA-secure, that is stronger than EAV, so
+          % anything CPA-secure is also EAV secure
+
+          \begin{proof}
+            Within every message, the scheme is CPA-secure because it uses the
+            same method as the CTR security mode.
+
+            Since every message is CPA-secure, over multiple messages, the
+            scheme is CPA-secure, which is a stronger guarantee than
+            EAV-security.
+          \end{proof}
     \end{enumerate}
   \item Show that the CBC and CTR modes of operation do not yield CCA-secure
     encryption schemes (regardless of $F$).
+
+    % To prove this, create an experiment where you distinguish between two
+    % messages that you choose, and two vectors of <IV, seed>
 \end{enumerate}
 
 \end{document}
