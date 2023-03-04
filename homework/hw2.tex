@@ -82,6 +82,29 @@ Elise Corwin (), Jadriel Delim ()}
         \textit{Show that the definition cannot be achieved.}
     \end{definition}
 
+    FIXME add definition
+
+    We cannot meet this definition of perfect secrecy. Adversary $\mathcal{A}$ is given a challenge ciphertext c as part of the experiment. By chosen-plaintext attack, $\mathcal{A}$ has access to ciphertext $c_0$ and $c_1$:
+
+    \begin{equation}
+        c_0 = Enc_k(m_0)
+    \end{equation}
+
+    \begin{equation}
+        c_1 = Enc_k(m_1)
+    \end{equation}
+
+    Construct a distinguisher D to determine if $c_0$ or $c_1$ is the pseudorandomly generated ciphertext. Exactly one of them will be generated from the pseudorandom function F. \\
+    
+    Now, the distinguisher D captures the pseudorandomly generated ciphertext with probability 1. D also captures the truly uniform ciphertext with probability $\frac{1}{2^n}$. So,
+
+    \[
+        \left| \Pr\left[D^{F_k(\cdot)}(1^n) = 1\right] -
+      \Pr\left[D^{f(\cdot)}(1^n) = 1\right] \right| 
+      = 1 - \frac{1}{2^n}
+      \geq 1/2,
+      \]
+    
   \item Let $F$ be a pseudorandom permutation, and define a fixed-length
     encryption scheme $(\Enc, \Dec)$ as follows: On input $m \in
     \left\{0, 1\right\}^{n / 2}$ and key $k \in \left\{0, 1\right\}^n$,
