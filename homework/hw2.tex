@@ -14,6 +14,7 @@
 \DeclareMathOperator{\Gen}{\textsf{Gen}}
 \DeclareMathOperator{\Enc}{\textsf{Enc}}
 \DeclareMathOperator{\Dec}{\textsf{Dec}}
+\DeclareMathOperator{\IV}{\textsf{IV}}
 
 \title{Homework 2}
 \date{7 March 2023}
@@ -61,6 +62,68 @@ Elise Corwin (), Jadriel Delim ()}
         probability is taken over uniform choice of $f \in \Func_n$ and
       randomness of $D$.}
     \end{definition}
+
+    Pseudorandom according to this experiment is when the adversary cannot determine 
+    whether the output comes from a pseudorandom function or a uniform function. And according
+    to this problem, the output is defined to be 1 or 0 indicating that you cannot distinguish between the outputs. 
+    
+    \begin{proof}
+      Choose a uniform bit $b \in \left\{0, 1\right\}$. If $b = 1$, then
+      generate a uniform key $k \in \left\{0, 1\right\}^n$.
+
+      Fix a PPT attacker $\mathcal{A}$ that receives $1^n$ as an input. If
+      \begin{enumerate}
+        \item $b = 0$, then give $\mathcal{A}$ a uniform function $f \in
+          \Func_n$.
+        \item $b = 1$, then give $\mathcal{A}$ a keyed pseudorandom function
+          $F_k$.
+      \end{enumerate}
+
+      The attacker $\mathcal{A}$ then runs the PRF indistinguishability
+      experiment, and outputs a new bit $b'$. If $b = b'$, then the experiment
+      is considered a success.
+
+      Create a distinguisher $D$ that uses $\mathcal{A}$ as a subroutine, and
+      returns whether the attacker could successfully distinguish between the
+      two schemes.
+
+      \begin{itemize}
+        \item If $b = 0$, $\mathcal{A}$ is given a uniform function $f \in \Func_n$.
+
+          Due to the definition of uniform functions, the chance that
+          $D$ successfully distinguishes two messages is exactly
+
+          \[
+            \Pr \left[D^{f(\cdot)}(1^n) = 1\right] = \frac{1}{2}
+          \].
+
+        \item If $b = 1$, $\mathcal{A}$, is given a pseudorandom keyed function
+          $F_k$.
+
+          Due to the definition of pseudorandom functions, the chance that
+          $D$ can distinguish between two messages is
+          $\frac{1}{2}$, plus some negligible amount $\negl(n)$. i.e.
+
+          \[
+            \Pr \left[D^{F_k(\cdot)} = 1\right] \leq \frac{1}{2} + \negl(n)
+          \]
+      \end{itemize}
+
+      For this experiment, we need to show that the attacker $\mathcal{A}$
+      cannot distinguish between what encryption function it receives as well.
+      We show this as
+
+      \begin{align*}
+        \left| \Pr \left[D^{f(\circ)}(1^n) = 1\right] - \Pr
+        \left[D^{F_k(\circ)}(1^n) - 1\right]\right| &\leq \left| \frac{1}{2} -
+        \frac{1}{2} + \negl(n) \right|\\
+                                                    &\leq \negl(n)
+      \end{align*}
+
+      Thus, we find an equivalent definition that $\mathcal{A}$ can only
+      distinguish between the two encryption schemes with negligible
+      probability.
+    \end{proof}
   \item Define a notion of perfect secrecy under a chosen-plaintext attack by
     adapting the following definition we've seen in class.
 
@@ -82,7 +145,9 @@ Elise Corwin (), Jadriel Delim ()}
         \textit{Show that the definition cannot be achieved.}
     \end{definition}
 
-    FIXME add definition
+    Perfect secrecy under a chosen-plaintext attack would mean that the 
+    adversary $\mathcal{A}$ has access to the ciphertexts $c_0$ and $c_1$, 
+    but the $\mathcal{A}$ would not be able to determine the corresponding plaintext $m_0$ and $m_1$.  
 
     We cannot meet this definition of perfect secrecy. Adversary $\mathcal{A}$ is given a challenge ciphertext c as part of the experiment. By chosen-plaintext attack, $\mathcal{A}$ has access to ciphertext $c_0$ and $c_1$:
 
@@ -124,6 +189,25 @@ Elise Corwin (), Jadriel Delim ()}
 
     Show how to decrypt, and prove that this scheme is CPA-secure for
     messages of length $n / 2$.
+
+    Now, we can use the message obtained from the decryption to show that the scheme is CPA-secure for length $n/2$. Use a uniform function $F$ instead of pseudorandom permutation $F_k$. Consider the following:
+
+    \[
+          | \Pr\left[\PrivK_{\mathcal{A}, \Pi}^\text{cpa}(n/2) = 1\right] - 
+          \Pr\left[\PrivK_{\mathcal{A}, \Pi\prime}^\text{cpa}(n/2) | = 1\right]
+          \leq
+          \textsf{negl}(n),
+        \]
+
+    Now, use proof by reduction. Assume towards contradiction that the adversary $\mathcal{A}$ is used to construct a distinguisher D. D will return 1 whenever a pseudorandom function is used and the adversary succeeds. By contrast, D will return 0 whenever a uniform function is used. This distinguisher D cannot reliably determine beyond random guessing whether or not the function is pseudorandom. Furthermore, the queries placed on distinguisher D is bounded by $\frac{q(n)}{2^n}$. So, 
+
+    \[
+          | \Pr\left[\PrivK_{\mathcal{A}, \Pi}^\text{cpa}(n/2) = 1\right] - 
+          \Pr\left[\PrivK_{\mathcal{A}, \Pi\prime}^\text{cpa}(n/2) | = 1\right]
+          \leq
+          \frac{q(n)}{2^n} + 1/2 + \textsf{negl}(n)
+        \]
+    
   \item Let $F$ be a pseudorandom function and $G$ be a pseudorandom generator
     with expansion factor $l(n) = n + 1$. For each of the following encryption
     schemes, state whether the scheme has indistinguishable encryptions in the
@@ -214,6 +298,68 @@ Elise Corwin (), Jadriel Delim ()}
 
     % To prove this, create an experiment where you distinguish between two
     % messages that you choose, and two vectors of <IV, seed>
+
+    \begin{proof}
+      Start with a scheme using the CTR mode of operation $\Pi$.
+
+      We have en encryption oracle $\Enc(\cdot)$ and a decryption oracle
+      $\Dec(\cdot)$ that will decrypt every ciphertext, except for the challenge
+      ciphertext.
+
+      Fix two messages $m_0 = 0^n, m_1 = 1^n$, and choose a uniform bit $b \in
+      \left\{0, 1\right\}$.
+
+      Use the encryption oracle $\Enc$ to encrypt a random message $m_b$, and
+      get the challenge ciphertext $c = F_k(\IV \Vert i) \oplus m_b$, where $i$
+      is the sequence number in CTR encryption.
+
+      Flip the first bit of $c$, changing it to $c'$, and request decryption of
+      that ciphertext from the decryption oracle $\Dec(c')$, which will output
+      some message $m'$.
+
+      If the bits of $m'$ are $0 1^{n - 1}$, then output the bit $b' = 1$.
+      Otherwise, output the bit $b' = 0$. Since this experiment will succeed
+      with $\Pr = 1$, we find that the CTR-mode of operation is not CCA-secure.
+    \end{proof}
+
+    % https://crypto.stackexchange.com/questions/62564/is-aes-cbc-mode-not-secure-against-chosen-cipher-text-attacks-even-if-the-iv-is
+
+    \begin{proof}
+      Start with a scheme using the CBC method of operation $\Pi$.
+
+      Fix two message $m_0 = 0^n, m_1 = 1^n$, and choose a uniform bit $b \in
+      \left\{0, 1\right\}$.
+
+      Use the encryption oracle to encrypt a random message $m_b$, and get the
+      challenge ciphertext $c = \left\langle c_{i - 1}, F_k(c_{i - 1} \oplus
+      m_b)\right\rangle $ where $c_{i - 1}$ is
+      the previous message in the chain, or the $\IV$.
+
+      Flip the first bit of the previous message $c_{i - 1}$, and request the decryption of
+      $c' = \left\langle c^{'}_{i - 1}, F(c_{i - 1} \oplus m_b)\right\rangle$.
+
+      Then, the decryption oracle gives us the message $m' = F_{k}^{-1}(F_k(c_{i
+      - 1} \oplus m_b) \oplus c^{'}_{i - 1}$.
+
+      Due to the definition of CBC, we get the decryption of a message from
+      ciphertext $c_i$ by doing $F_{k}^{-1}(c_i) \oplus c_{i - 1}$. Thus,
+      plugging in the ciphertext $c'$ we get
+
+      \begin{align*}
+        m' &= F_{k}^{-1}(F_k(c_{i - 1} \oplus m_b)) \oplus c^{'}_{i - 1}\\
+           &= c_{i - 1} \oplus m_b \oplus c^{'}_{i - 1}\\
+           &= c_{i - 1} \oplus m_b \oplus c^{'}_{i - 1} \oplus c_{i - 1}\\
+           &= m_b \oplus c^{'}_{i - 1}\\
+           &= m_b \oplus c^{'}_{i - 1} \oplus c_{i - 1}\\
+           &= m_b \oplus \left\{0, 1\right\}0^{n - 1}
+      \end{align*}
+
+      Then, output the bit $b' = 0$ if the string $m_b$ is $10^{n - 1}$, or $b'
+      = 1$ if $01^{n - 1}$.
+
+      Therefore, the CBC mode of security is not CCA-secure.
+    \end{proof}
 \end{enumerate}
 
 \end{document}
+
