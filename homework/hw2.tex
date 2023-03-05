@@ -61,6 +61,64 @@ Elise Corwin (), Jadriel Delim ()}
         probability is taken over uniform choice of $f \in \Func_n$ and
       randomness of $D$.}
     \end{definition}
+
+    \begin{proof}
+      Choose a uniform bit $b \in \left\{0, 1\right\}$. If $b = 1$, then
+      generate a uniform key $k \in \left\{0, 1\right\}^n$.
+
+      Fix a PPT attacker $\mathcal{A}$ that receives $1^n$ as an input. If
+      \begin{enumerate}
+        \item $b = 0$, then give $\mathcal{A}$ a uniform function $f \in
+          \Func_n$.
+        \item $b = 1$, then give $\mathcal{A}$ a keyed pseudorandom function
+          $F_k$.
+      \end{enumerate}
+
+      The attacker $\mathcal{A}$ then runs the PRF indistinguishability
+      experiment, and outputs a new bit $b'$. If $b = b'$, then the experiment
+      is considered a success.
+
+      Create a distinguisher $D$ that uses $\mathcal{A}$ as a subroutine, and
+      returns whether the attacker could successfully distinguish between the
+      two schemes.
+
+      \begin{itemize}
+        \item If $b = 0$, $\mathcal{A}$ is given a uniform function $f \in \Func_n$.
+
+          Due to the definition of uniform functions, the chance that
+          $D$ successfully distinguishes two messages is exactly
+
+          \[
+            \Pr \left[D^{f(\cdot)}(1^n) = 1\right] = \frac{1}{2}
+          \].
+
+        \item If $b = 1$, $\mathcal{A}$, is given a pseudorandom keyed function
+          $F_k$.
+
+          Due to the definition of pseudorandom functions, the chance that
+          $D$ can distinguish between two messages is
+          $\frac{1}{2}$, plus some negligible amount $\negl(n)$. i.e.
+
+          \[
+            \Pr \left[D^{F_k(\cdot)} = 1\right] \leq \frac{1}{2} + \negl(n)
+          \]
+      \end{itemize}
+
+      For this experiment, we need to show that the attacker $\mathcal{A}$
+      cannot distinguish between what encryption function it receives as well.
+      We show this as
+
+      \begin{align*}
+        \left| \Pr \left[D^{f(\circ)}(1^n) = 1\right] - \Pr
+        \left[D^{F_k(\circ)}(1^n) - 1\right]\right| &\leq \left| \frac{1}{2} -
+        \frac{1}{2} + \negl(n) \right|\\
+                                                    &\leq \negl(n)
+      \end{align*}
+
+      Thus, we find an equivalent definition that $\mathcal{A}$ can only
+      distinguish between the two encryption schemes with negligible
+      probability.
+    \end{proof}
   \item Define a notion of perfect secrecy under a chosen-plaintext attack by
     adapting the following definition we've seen in class.
 
