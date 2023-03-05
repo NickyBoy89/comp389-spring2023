@@ -14,6 +14,7 @@
 \DeclareMathOperator{\Gen}{\textsf{Gen}}
 \DeclareMathOperator{\Enc}{\textsf{Enc}}
 \DeclareMathOperator{\Dec}{\textsf{Dec}}
+\DeclareMathOperator{\IV}{\textsf{IV}}
 
 \title{Homework 2}
 \date{7 March 2023}
@@ -278,6 +279,67 @@ Elise Corwin (), Jadriel Delim ()}
 
     % To prove this, create an experiment where you distinguish between two
     % messages that you choose, and two vectors of <IV, seed>
+
+    \begin{proof}
+      Start with a scheme using the CTR mode of operation $\Pi$.
+
+      We have en encryption oracle $\Enc(\cdot)$ and a decryption oracle
+      $\Dec(\cdot)$ that will decrypt every ciphertext, except for the challenge
+      ciphertext.
+
+      Fix two messages $m_0 = 0^n, m_1 = 1^n$, and choose a uniform bit $b \in
+      \left\{0, 1\right\}$.
+
+      Use the encryption oracle $\Enc$ to encrypt a random message $m_b$, and
+      get the challenge ciphertext $c = F_k(\IV \Vert i) \oplus m_b$, where $i$
+      is the sequence number in CTR encryption.
+
+      Flip the first bit of $c$, changing it to $c'$, and request decryption of
+      that ciphertext from the decryption oracle $\Dec(c')$, which will output
+      some message $m'$.
+
+      If the bits of $m'$ are $0 1^{n - 1}$, then output the bit $b' = 1$.
+      Otherwise, output the bit $b' = 0$. Since this experiment will succeed
+      with $\Pr = 1$, we find that the CTR-mode of operation is not CCA-secure.
+    \end{proof}
+
+    % https://crypto.stackexchange.com/questions/62564/is-aes-cbc-mode-not-secure-against-chosen-cipher-text-attacks-even-if-the-iv-is
+
+    \begin{proof}
+      Start with a scheme using the CBC method of operation $\Pi$.
+
+      Fix two message $m_0 = 0^n, m_1 = 1^n$, and choose a uniform bit $b \in
+      \left\{0, 1\right\}$.
+
+      Use the encryption oracle to encrypt a random message $m_b$, and get the
+      challenge ciphertext $c = \left\langle c_{i - 1}, F_k(c_{i - 1} \oplus
+      m_b)\right\rangle $ where $c_{i - 1}$ is
+      the previous message in the chain, or the $\IV$.
+
+      Flip the first bit of the previous message $c_{i - 1}$, and request the decryption of
+      $c' = \left\langle c^{'}_{i - 1}, F(c_{i - 1} \oplus m_b)\right\rangle$.
+
+      Then, the decryption oracle gives us the message $m' = F_{k}^{-1}(F_k(c_{i
+      - 1} \oplus m_b) \oplus c^{'}_{i - 1}$.
+
+      Due to the definition of CBC, we get the decryption of a message from
+      ciphertext $c_i$ by doing $F_{k}^{-1}(c_i) \oplus c_{i - 1}$. Thus,
+      plugging in the ciphertext $c'$ we get
+
+      \begin{align*}
+        m' &= F_{k}^{-1}(F_k(c_{i - 1} \oplus m_b)) \oplus c^{'}_{i - 1}\\
+           &= c_{i - 1} \oplus m_b \oplus c^{'}_{i - 1}\\
+           &= c_{i - 1} \oplus m_b \oplus c^{'}_{i - 1} \oplus c_{i - 1}\\
+           &= m_b \oplus c^{'}_{i - 1}\\
+           &= m_b \oplus c^{'}_{i - 1} \oplus c_{i - 1}\\
+           &= m_b \oplus \left\{0, 1\right\}0^{n - 1}
+      \end{align*}
+
+      Then, output the bit $b' = 0$ if the string $m_b$ is $10^{n - 1}$, or $b'
+      = 1$ if $01^{n - 1}$.
+
+      Therefore, the CBC mode of security is not CCA-secure.
+    \end{proof}
 \end{enumerate}
 
 \end{document}
