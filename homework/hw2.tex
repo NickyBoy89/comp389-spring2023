@@ -145,8 +145,8 @@ Elise Corwin (), Jadriel Delim ()}
     \end{definition}
 
     Perfect secrecy under a chosen-plaintext attack would mean that the 
-    adversary $\mathcal{A}$ has access to the ciphertexts $c_0$ and $c_1$, 
-    but the $\mathcal{A}$ would not be able to determine the corresponding plaintext $m_0$ and $m_1$.  
+    adversary $\mathcal{A}$ chooses $m_0$ and $m_1$, knows the challenge ciphertext
+    $c_0$ and $c_1$, and has access to the encryption oracle.
 
     We cannot meet this definition of perfect secrecy. Adversary $\mathcal{A}$ is given a challenge ciphertext c as part of the experiment. By chosen-plaintext attack, $\mathcal{A}$ has access to ciphertext $c_0$ and $c_1$:
 
