@@ -145,68 +145,126 @@ Elise Corwin (), Jadriel Delim ()}
         \textit{Show that the definition cannot be achieved.}
     \end{definition}
 
-    Perfect secrecy under a chosen-plaintext attack would mean that the 
-    adversary $\mathcal{A}$ has access to the ciphertexts $c_0$ and $c_1$, 
-    but the $\mathcal{A}$ would not be able to determine the corresponding plaintext $m_0$ and $m_1$.  
+    \begin{proof}
+      Fix some PPT attacker $\mathcal{A}$ that can distinguish between
+      pseudorandom and uniformly chosen functions.
 
-    We cannot meet this definition of perfect secrecy. Adversary $\mathcal{A}$ is given a challenge ciphertext c as part of the experiment. By chosen-plaintext attack, $\mathcal{A}$ has access to ciphertext $c_0$ and $c_1$:
+      Construct some distinguisher $D$ uses $\mathcal{A}$ and
+      \begin{enumerate}
+        \item Outputs a bit $b' = 1$ if the function is pseudorandom.
+        \item Or outputs $b' = 0$ if the function is uniformly chosen.
+      \end{enumerate}
 
-    \begin{equation}
-        c_0 = Enc_k(m_0)
-    \end{equation}
+      Choose two messages $m_0, m_1 \in \left\{0, 1\right\}^n$, and choose a 
+      uniform bit $b \in \left\{0, 1\right\}$.
 
-    \begin{equation}
-        c_1 = Enc_k(m_1)
-    \end{equation}
+      Then
+      \begin{enumerate}
+        \item If $b = 0$, then input a pseudorandom keyed function $F_k$, for
+          some uniform $k \in \left\{0, 1\right\}^n$, to the distinguisher $D$.
+        \item If $b = 1$, then give $D$ access to a uniform function $f \in
+          \Func_n$.
+      \end{enumerate}
 
-    Construct a distinguisher D to determine if $c_0$ or $c_1$ is the pseudorandomly generated ciphertext. Exactly one of them will be generated from the pseudorandom function F. \\
-    
-    Now, the distinguisher D captures the pseudorandomly generated ciphertext with probability 1. D also captures the truly uniform ciphertext with probability $\frac{1}{2^n}$. So,
-
-    \[
-        \left| \Pr\left[D^{F_k(\cdot)}(1^n) = 1\right] -
-      \Pr\left[D^{f(\cdot)}(1^n) = 1\right] \right| 
-      = 1 - \frac{1}{2^n}
-      \geq 1/2,
+      Due to the chosen-plaintext attack, we know that the adversary observes
+      the same view of the encryption whether it is pseudorandom or unifom, i.e.
+      there exists a function such that
+      \[
+        \left| \Pr \left[D^{F_k(\cdot)}(1^n) = 1\right] - \Pr
+        \left[D^{f(\cdot)}(1^n) =
+        0\right] \right| \leq \negl(n)
       \]
-    
+
+      However, since the distinguisher $D$ can determine a pseudorandom function
+      with probability $1$, and will happen to guess the correct function $f$
+      out of all the $2^n$ $n$-bit strings with a probability of $\frac{1}{2^n}$ 
+      we instead find that
+
+      \begin{align*}
+        \left| \Pr \left[D^{F_k(\cdot)}(1^n) = 1\right] - \Pr
+        \left[D^{f(\cdot)}(1^n) =
+        0\right] \right| &\leq \negl(n)\\
+        1 - \frac{1}{2^n} &\not\leq \negl(n).
+      \end{align*}
+
+      Therefore, since no such attacker can exist, no such definition can be made.
+    \end{proof}
+
   \item Let $F$ be a pseudorandom permutation, and define a fixed-length
     encryption scheme $(\Enc, \Dec)$ as follows: On input $m \in
     \left\{0, 1\right\}^{n / 2}$ and key $k \in \left\{0, 1\right\}^n$,
     algorithm $\Enc$ chooses a uniform string $r \in \left\{0,
     1\right\}^{n/2}$ of length $n/2$ and computes $c := F_k(r \Vert m)$.
 
-    How to decrypt:
+    \begin{enumerate}
+      \item Show how to decrypt a message
 
-    \begin{align*}
-      c &= F_k(r \Vert m)\\
-    \end{align*}
-    \begin{align*}
-      r \Vert m &= F^{-1}_k(c)\\
-    \end{align*}
+        If we encrypt some message $m$ with the following method
 
-    Now, we can get $m$ by cutting off the first $n / 2$ bits of $r \Vert m$.
+        \begin{align*}
+          c &= F_k(r \Vert m)\\
+        \end{align*}
 
-    Show how to decrypt, and prove that this scheme is CPA-secure for
-    messages of length $n / 2$.
+        Since $F$ is a pseudorandom permutation, it has an inverse $F^{-1}$, which
+        we can use to get the original message back
 
-    Now, we can use the message obtained from the decryption to show that the scheme is CPA-secure for length $n/2$. Use a uniform function $F$ instead of pseudorandom permutation $F_k$. Consider the following:
+        \begin{align*}
+          r \Vert m &= F^{-1}_k(c)\\
+        \end{align*}
 
-    \[
-          | \Pr\left[\PrivK_{\mathcal{A}, \Pi}^\text{cpa}(n/2) = 1\right] - 
-          \Pr\left[\PrivK_{\mathcal{A}, \Pi\prime}^\text{cpa}(n/2) | = 1\right]
-          \leq
-          \textsf{negl}(n),
-        \]
+        Now, we can get $m$ by cutting off the first $n / 2$ bits of $r \Vert m$.
+      \item Prove that this scheme is CPA-secure for messages of length $n / 2$.
 
-    Now, use proof by reduction. Assume towards contradiction that the adversary $\mathcal{A}$ is used to construct a distinguisher D. D will return 1 whenever a pseudorandom function is used and the adversary succeeds. By contrast, D will return 0 whenever a uniform function is used. This distinguisher D cannot reliably determine beyond random guessing whether or not the function is pseudorandom. Furthermore, the queries placed on distinguisher D is bounded by $\frac{q(n)}{2^n}$. So, 
+        \begin{proof}
+          Construct a modified scheme $\tilde{\Pi}$ with functions
+          $(\tilde{\Enc}, \tilde{\Dec})$ that uses a uniform function $f \in
+          \Func_n$ instead of a pseudorandom keyed function $F_k$.
 
-    \[
-          | \Pr\left[\PrivK_{\mathcal{A}, \Pi}^\text{cpa}(n/2) = 1\right] - 
-          \Pr\left[\PrivK_{\mathcal{A}, \Pi\prime}^\text{cpa}(n/2) | = 1\right]
-          \leq
-          \frac{q(n)}{2^n} + 1/2 + \textsf{negl}(n)
-        \]
+          Fix a PPT attacker $\mathcal{A}$, and construct some distinguisher $D$
+          that runs the $\PrivK^{\textbf{cpa}}$ experiment with $\mathcal{A}$:
+          \begin{enumerate}
+            \item Gives $\mathcal{A}$ some message $m \in \left\{0, 1\right\}^{n
+              / 2}$.
+            \item When $\mathcal{A}$ requests encryption of the message, query
+              the encryption oracle for that specific scheme (either $\Enc$ or
+              $\tilde{\Enc}$)
+            \item When $\mathcal{A}$ comes to a decision and outputs a bit $b'$,
+              we guess either outcome
+              \begin{enumerate}
+                \item $b' = b$, which indicates a success and $\mathcal{A}$ must
+                  be operating with a \textit{pseudorandom function}.
+                \item $b' \neq b$, which assumes that $\mathcal{A}$ must be
+                  operating with a \textit{uniform function}.
+              \end{enumerate}
+          \end{enumerate}
+
+          Since we have that $F$ is a pseudorandom permutation, we know there
+          is a function such that:
+
+          \[
+            \left| \Pr\left[\PrivK_{\mathcal{A}, \Pi}^\text{cpa}(n/2) = 1\right] - 
+            \Pr\left[\PrivK_{\mathcal{A}, \Pi\prime}^\text{cpa}(n/2) =
+            1 \right] \right| \leq \textsf{negl}(n).
+          \]
+
+          However, since the attacker has access to an encryption oracle, there
+          still is a possibility of guessing the uniform nonce $r$ within each
+          message by exhaustive search of all $2^n$ $n$-bit pseudorandom
+          functions, and concatenating it to the message. However, since our
+          attacker runs in probabilistic polynomial time, we can only encrypt at
+          most $q(n)$ messages, where $q$ is bounded by some polynomial.
+
+          Thus, we have that
+          \[
+            \left| \Pr\left[\PrivK_{\mathcal{A}, \Pi}^\text{cpa}(n/2) = 1\right] - 
+            \Pr\left[\PrivK_{\mathcal{A}, \Pi\prime}^\text{cpa}(n/2) \right] =
+            1\right| \leq \frac{q(n)}{2^n} + \frac{1}{2} + \textsf{negl}(n)
+          \]
+
+          And since there exists some negligible function, we have that the
+          scheme is CPA-secure.
+        \end{proof}
+    \end{enumerate}
     
   \item Let $F$ be a pseudorandom function and $G$ be a pseudorandom generator
     with expansion factor $l(n) = n + 1$. For each of the following encryption
