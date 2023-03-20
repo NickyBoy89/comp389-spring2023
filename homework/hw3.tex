@@ -1,0 +1,260 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+
+\DeclareMathOperator{\Mac}{\textsf{Mac}}
+\DeclareMathOperator{\Vrfy}{\textsf{Vrfy}}
+\DeclareMathOperator{\negl}{\textsf{negl}}
+
+\title{Homework 3}
+\date{23 March 2023}
+\author{Nicholas Novak (), Yash Karandikar (),\\
+Elise Corwin (), Jadriel Delim ()}
+
+\begin{document}
+\maketitle
+
+\begin{enumerate}
+  \item Let $F$ be a pseudorandom function. Show that the following MAC for
+    messages of length $2n$ is insecure: The shared key is a random $k \in
+    \left\{0, 1\right\}^n$. To authenticate a message $m_1 \Vert m_2$ with
+    $|m_1| = |m_2| = n$, compute the tag $\left\langle F_k(m_1),
+    F_k(F_k(m_2))\right\rangle$.
+
+    \begin{proof}
+      Take two messages $m_1, m_2 \in \left\{0, 1\right\}^n$.
+
+      With access to the MAC oracle $\Mac_k$, get the tags of the two messages
+      in the following format:
+
+      \begin{align*}
+        \Mac_k(m_1 \Vert m_1) &= \left\langle F_k(t_1),
+        F_k(F_k(t_1))\right\rangle = \left\langle t_1, t_{1}'\right\rangle\\
+        \Mac_k(m_2 \Vert m_2) &= \left\langle F_k(t_2),
+        F_k(F_k(t_2))\right\rangle = \left\langle t_2, t_{2}'\right\rangle
+      \end{align*}
+
+      From there, the attacker can generate a new message $m_1 \Vert m_2$ with 
+      the valid tag $\left\langle t_1, t_{2}'\right\rangle$. And, since we can
+      forge a new message that has not been previously asked to the oracle, the 
+      MAC is not secure.
+    \end{proof}
+
+  \item We explore what happens when the basic CBC-MAC construction is used with
+    messages of different lengths.
+    \begin{enumerate}
+      \item Say the sender and receiver do not agree on the message length in
+        advance (and so $\Vrfy_k(m, t) = 1$ iff $t = \Mac_k(m)$, regardless of
+        the length of $m$), but the sender is careful to only authenticate
+        messages of length $2n$. Show that an adversary can forge a valid tag on
+        a message of length $4n$.
+
+        \begin{proof}
+          The sender fixes some message $m \in \left\{0, 1\right\}^{2n}$. Then,
+          the message is split into two blocks of length $n$, i.e. $m = b_1, b_2$
+          and $|b_1| = |b_2| = n$.
+
+          Using CBC-MAC, the sender calculates a tag $t$ for the message $m$:
+
+          \[  
+            t = F_k(F_k(0^n \oplus b_1) \oplus b_2)
+          \]
+
+          Then, the attacker creates a message $m'$ from the blocks of $m$ so
+          that
+
+          \[
+            m' = b_1, b_2, t \oplus b_1, b_2
+          \]
+
+          With this, the tag for the message $m'$ is calculated as the
+          following:
+
+
+          \begin{align*}
+            t' &= F_k(F_k(F_k(F_k(0^n \oplus b_1) \oplus b_2) \oplus (t \oplus
+            b_1) \oplus b_2)\\
+            &= F_k(F_k(t \oplus (t \oplus b_1) \oplus b_2)\\
+            &= F_k(F_k(0 \oplus b_1) \oplus b_2)\\
+            &= F_k(F_k(b_1) \oplus b_2)\\
+            t' &= t
+          \end{align*}
+
+          Thus, we find a different message $m'$ that has the same tag $t$, and
+          we have successfully forged a previously unknown tag.
+        \end{proof}
+
+      \item Say the receiver only accepts 3-block message (so $\Vrfy_k(m, t) =
+        1$ only if $m$ has length $3n$ and $t = \Mac_k(m)$), but the sender
+        authenticates messages of any length a multiple of $n$. Show that an
+        adversary can forge a valid tag on a new message.
+
+        \begin{proof}
+          Fix a message $m \in \left\{0, 1\right\}^{2n}$. Split $m$ into $2$
+          blocks of length $n$, such that $m = b_1, b_2$ and $|b_1| = |b_2| =
+          n$.
+
+          Then, the tag $t$ with CBC-MAC is calculated as:
+          \[
+            t = F_k(F_k(0^n \oplus b_1) \oplus b_2)
+          \]
+
+          The attacker chooses adds an additional block, $r$, of length $n$, and
+          requests the tag of the block $r$ such that $t_r = F_k(0^n \oplus r)$.
+
+          From this, the attacker constructs a new message $m'$ such that:
+
+          \[
+            m' = r \Vert (b_1 \oplus t_r) \Vert b_2
+          \]
+
+          With this, the tag for the new message $m'$ is calculated as:
+
+          \begin{align*}
+            t' &= F_k(F_k(F_k(0^n \oplus r) \oplus (b_1 \oplus t_r)) \oplus b_2)\\
+               &= F_k(F_k(t_r \oplus (b_1 \oplus t_r)) \oplus r_2)\\
+               &= F_k(F_k(0^n \oplus b_1) \oplus b_2)\\
+            t' &= t
+          \end{align*}
+
+          Thus, since we have not explicitly asked the $\Mac$ oracle for the tag
+          of $m'$, we find that we have successfully forged a tag for a message
+          of length $3n$ from a message of length $2n$. Thus, we have shown that
+          this attack is possible.
+        \end{proof}
+    \end{enumerate}
+  \item Let $H$ be a collision-resistant hash function. Is $\hat{H}$ defined by
+    $\hat{H} = H(H(x))$ necessarily collision resistant?
+
+    \begin{proof}
+      Let $x_1, x_2 \in \left\{0, 1\right\}^{*}$ be two arbitrary strings input
+      to the hash function $\hat{H}$.
+
+      If we have a collision in $\hat{H}$, i.e. $\hat{H}(x_1) = \hat{H}(x_2)$,
+      there is one of two cases where we could have gotten here:
+      \begin{enumerate}
+        \item If $x_1 \neq x_2$, and we have a collision, that means that in the
+          hash function $H$, $H(x_1) = H(x_2)$, and if we rewrite the equation, 
+          we find by extension $H(H(x_1)) = H(H(x_2))$.
+        \item Otherwise, if $x_1 = x_2$, we find that the hash function $H$
+          equals itself, and we can find also that $H(H(x_1)) = H(H(x_2))$.
+      \end{enumerate}
+
+      We can see that a collision in $\hat{H}$ only happens if there is a
+      collision in $H$ as well. And by assumption that $H$ is collision
+      resistant, this only occurs with negligible probability, and thus we find 
+      that $\hat{H}$ is collision-resistant as well.
+    \end{proof}
+
+  \item Let $h$ be a fixed length hash function for inputs of length $2n$ and
+    with output length $n$. Construct hash function $H$ as follows: on a string
+    input $x \in \left\{0, 1\right\}^*$ of length $L < 2^n$, do the following:
+    \begin{enumerate}
+      \item[(i)] Set $B := \left\lceil\frac{L}{n}\right\rceil$ (i.e. the number of
+        blocks in $x$). Pad $x$ with zeros so its length is a multiple of $n$.
+        Parse the padded result as the sequence of $n$-bit blocks $x_1, \dots,
+        x_B$. Set $x_{B+1} := L$, where $L$ is encoded as an $n$-bit string.
+      \item[(ii)] Set $z_0 := 0^n$. (This is also called the $IV$.)
+      \item[(iii)] For $i = 1, \dots, B + 1$, computer $z_i := h(z_{i - 1} \Vert x_i)$.
+      \item[(iv)] Output $z_{B + 1}$.
+    \end{enumerate}
+
+    The above construction is called the Merkle-Damg\aa rd transform, and is
+    often used to construct a hash function handling arbitrary-length inputs
+    given a hash function handling fixed-length inputs. It can be proved that
+    if $h$ is collision-resistant, then so is $H$.
+
+    For each of the following modifications to the Merkle-Damg\aa rd transform,
+    determine whether the result is collision-resistant or not. If yes, provide
+    a proof; if not, demonstrate an attack.
+
+    \begin{enumerate}
+      \item Modify the construction so that the input length is not included at
+        all (i.e., output $z_B$ and not $z_{B + 1} = h(z_B \Vert L)$).
+
+        \begin{proof}
+          Let the block length be some $n$. Fix two strings $x_1, x_2$ such
+          that $|x_1| < n$, $|x_2| < n$, and:
+          \begin{enumerate}
+            \item $x_1 = \left\{0, 1\right\} 0$
+            \item $x_2 = \left\{0, 1\right\}$
+          \end{enumerate}
+
+          i.e. one of the messages has a zero at the end of it.
+
+          However, since we have no record of length, and we pad all the
+          strings with zeroes, once they are padded, we don't know them apart,
+          and we have a collision in $H$, i.e $H(x_1) = H(x_2)$. Thus, this 
+          variant is \textit{not} collision-resistant.
+        \end{proof}
+
+      \item Modify the construction so that instead of outputting $z = h(z_B
+        \Vert L)$, the algorithm outputs $z_B \Vert L$.
+
+        \begin{proof}
+          Fix two arbitrary-length strings $x_1, x_2$ of length $L_1, L_2$ that 
+          cause a collision in $H$, i.e. $H(x_1) = H(x_2)$.
+
+          There are several cases:
+          \begin{enumerate}
+            \item If $L_1 \neq L_2$, since each part of the hash is independent
+              (concatenated together), the strings need to be of same length to
+              collide.
+            \item If $L_1 = L_2$, with similar reasoning to the case above, the
+              only way in which the hashes $z_B$ could be the same for inputs
+              $x_1 \neq x_2$, is if there is a collision in $h$.
+          \end{enumerate}
+
+          Since we find a collision in the modified scheme if $h$ has a
+          collision, and none otherwise, we can determine that the new scheme is
+          also collision-resistant.
+        \end{proof}
+
+      \item Instead of using an $IV$, just start the computation from $x_1$.
+        That is, define $z_1 := x_1$ and then compute $z_i := h(z_{i - 1} \Vert
+        x_i)$ for $i = 2, \dots, B + 1$ and output $z_{B + 1}$ as before.
+
+        \begin{proof}
+          In the modified scheme, the new hash function is calculated as:
+
+          \[
+            h(\dots h(h(h(x_1 \Vert x_2) \Vert x_2) \dots )\Vert L)
+          \]
+
+          Since the two first strings are concatenated, each of the two sides
+          are independent. Thus, the only way that the hash function will output
+          the same value is if $x_1 = x_2$, which does not depend on the order.
+          Since we cannot re-order these two values to get the same value,
+          except for a collision in $h$ itself, and using the general proof for
+          the Merkle-Damg\aa rd transform, we find that this construction is
+          also secure.
+        \end{proof}
+
+      \item Instead of using a fixed $IV$. set $z_0 := L$ and then compute $z_i
+        := h(z_{i - 1} \Vert x_i)$ for $i = 1, \dots, B$ and output $z_B$.
+
+        \begin{proof}
+          Assume two arbitrary-length strings $x_1, x_2$ of lengths $L_1$ and
+          $L_2$ respectively, where there is a collision $H(x_1) = H(x_2)$.
+
+          Due to the modification, we have several cases:
+          \begin{enumerate}
+            \item If the lengths of the strings are the same, i.e $L_1 = L_2$, 
+              since the first $n$ bits encode the length, the only way that
+              there could be a collision is in the hash function $h$.
+            \item If the lengths are different, and $L_1 \neq L_2$, the first
+              $n$ bits of each hash function are different, and therefore the
+              only way that a collision would happen is if the first blocks are
+              different and we have a collision in $h$.
+          \end{enumerate}
+
+          Thus, we find that this variation is also secure.
+        \end{proof}
+
+    \end{enumerate}
+\end{enumerate}
+
+\end{document}
