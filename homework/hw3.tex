@@ -31,10 +31,10 @@ Elise Corwin (), Jadriel Delim ()}
       in the following format:
 
       \begin{align*}
-        \Mac_k(m_1 \Vert m_1) &= \left\langle F_k(t_1),
-        F_k(F_k(t_1))\right\rangle = \left\langle t_1, t_{1}'\right\rangle\\
-        \Mac_k(m_2 \Vert m_2) &= \left\langle F_k(t_2),
-        F_k(F_k(t_2))\right\rangle = \left\langle t_2, t_{2}'\right\rangle
+        \Mac_k(m_1 \Vert m_1) &= \left\langle F_k(m_1),
+        F_k(F_k(m_1))\right\rangle = \left\langle t_1, t_{1}'\right\rangle\\
+        \Mac_k(m_2 \Vert m_2) &= \left\langle F_k(m_2),
+        F_k(F_k(m_2))\right\rangle = \left\langle t_2, t_{2}'\right\rangle
       \end{align*}
 
       From there, the attacker can generate a new message $m_1 \Vert m_2$ with 
@@ -76,10 +76,9 @@ Elise Corwin (), Jadriel Delim ()}
 
           \begin{align*}
             t' &= F_k(F_k(F_k(F_k(0^n \oplus b_1) \oplus b_2) \oplus (t \oplus
-            b_1) \oplus b_2)\\
-            &= F_k(F_k(t \oplus (t \oplus b_1) \oplus b_2)\\
-            &= F_k(F_k(0 \oplus b_1) \oplus b_2)\\
-            &= F_k(F_k(b_1) \oplus b_2)\\
+            b_1)) \oplus b_2)\\
+            &= F_k(F_k(t \oplus (t \oplus b_1)) \oplus b_2)\\
+            &= F_k(F_k(0^n \oplus b_1) \oplus b_2)\\
             t' &= t
           \end{align*}
 
