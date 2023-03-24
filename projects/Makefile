@@ -6,7 +6,7 @@ CFLAGS=-O1 -Wall
 all: proj1
 
 run: all
-	./$(PROJS)
+	./proj1
 
 test:
 	python3 testcases.py
