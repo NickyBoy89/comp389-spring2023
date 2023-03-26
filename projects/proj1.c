@@ -1,7 +1,7 @@
+#include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
-#include <stdbool.h>
 
 #define BYTE_SIZE 8
 #define BASE64_BYTE_SIZE 6
@@ -23,8 +23,20 @@ unsigned char base64_ascii_to_char(char input) {
   }
 }
 
+void hexdump_data(const char data[], int data_size) {
+  int num_columns = data_size / 16;
+  if (num_columns % 8 != 0) {
+    num_columns += 1;
+  }
+
+  for (int ri = 0; ri < num_columns; ri++) {
+    int start_index = 2 * ri;
+    printf("Column %d starts at index %d and ends at %d\n", ri, start_index, 0);
+  }
+}
+
 int main(void) {
-  char* input = "Hi\n";
+  char *input = "Hi\n";
   int input_len = strlen(input);
 
   int num_bits = sizeof(char) * input_len * 8;
@@ -38,9 +50,9 @@ int main(void) {
   }
 
   // Create an array to store the blocks
-  // We don't know the size of this until we calculate it, so it has to live 
+  // We don't know the size of this until we calculate it, so it has to live
   // on the heap
-  char* output_str = malloc(sizeof(char) * num_blocks);
+  char *output_str = malloc(sizeof(char) * num_blocks);
   int output_index = 0;
   if (output_str == NULL) {
     printf("Allocation of array failed!\n");
@@ -55,7 +67,8 @@ int main(void) {
     int data_index = i / BYTE_SIZE;
     // `reverse_bit` extracts the ith bit of the current byte, starting from the
     // most significant bit
-    int reverse_bit = (input[data_index] & (0x01 << ((BYTE_SIZE - 1) - (i % BYTE_SIZE)))) != 0;
+    int reverse_bit = (input[data_index] &
+                       (0x01 << ((BYTE_SIZE - 1) - (i % BYTE_SIZE)))) != 0;
     // `temp_shift` is the index of the bit in the base64 byte
     int temp_shift = (BASE64_BYTE_SIZE - 1) - (i % BASE64_BYTE_SIZE);
     // Set that bit to the extracted bit
@@ -68,7 +81,7 @@ int main(void) {
     }
   }
 
-  // If the result was padded, then we'll need to treat the in-progress base64 
+  // If the result was padded, then we'll need to treat the in-progress base64
   // byte as a full byte, and it's already zero-padded
   if (needs_padding) {
     output_str[output_index] = temp_byte;
@@ -76,13 +89,13 @@ int main(void) {
 
   // Print out the character encoding of every base64 byte
   for (int bi = 0; bi < num_blocks; bi++) {
-    //printf("%.6b ", output_str[bi]);
+    // printf("%.6b ", output_str[bi]);
     printf("%c", base64_ascii_to_char(output_str[bi]));
   }
 
   // Pad the rest until the block length is a multiple of 4
   while (num_blocks++ % 4 != 0) {
-    //printf("%.6b ", 0x0);
+    // printf("%.6b ", 0x0);
     printf("=");
   }
 
