@@ -5,7 +5,7 @@ PROJ1_OBJS := base64.o
 PROJ2_OBJS := pbm.o
 
 CC=gcc
-CFLAGS=-O1 -Wall
+CFLAGS=-O1 -Wall -Wextra -pedantic
 
 all: $(PROJS)
 
