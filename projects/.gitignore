@@ -1,5 +1,7 @@
-proj1
-proj2
+proj1/proj1
+proj2/proj2
+
+proj1/testcases/
 
 # Object files
 *.o
