@@ -10,6 +10,9 @@
 
 #define HEXDUMP_DATA_SIZE 16
 
+#define FILLER_CHARACTER '.'
+#define INVALID_CHARACTER '~'
+
 void hexdump_data(const unsigned char data[], int data_size, int start_byte) {
   int row_counter = start_byte;
   for (int row = 0; row < data_size; row += BYTES_PER_ROW) {
@@ -27,7 +30,7 @@ void hexdump_data(const unsigned char data[], int data_size, int start_byte) {
 
       // Put a space halfway in between both columns
       if (current_byte == (BYTES_HALFWAY - 1)) {
-        printf("  ");
+        printf(" ");
       }
     }
 
@@ -38,16 +41,20 @@ void hexdump_data(const unsigned char data[], int data_size, int start_byte) {
     for (int current_byte = 0; current_byte < BYTES_PER_ROW; current_byte++) {
       char character = data[row + current_byte];
 
-      switch (character) {
+      // Don't print out the padding bytes
+      if (current_byte >= data_size) {
+        printf(" ");
+        continue;
+      }
+
+      if (character >= ' ' && character <= '~') {
         // Only print out the characters that work
-      case 'a' ... 'z':
-      case 'A' ... 'Z':
         printf("%c", character);
-        break;
+      } else if (character < 0) {
+        printf("%c", INVALID_CHARACTER);
+      } else {
         // Print a filler character for everything that can't be printed
-      default:
-        printf(".");
-        break;
+        printf("%c", FILLER_CHARACTER);
       }
     }
 
