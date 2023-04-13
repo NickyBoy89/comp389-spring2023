@@ -5,12 +5,16 @@ import subprocess
 
 testdir = "testcases"
 
-for file_number in range(0, 9):
-    with open(f"f{file_number}.hex", "wb") as output_file:
+exts = {"hexdump": "hex", "enc-base64": "b64"}
+
+
+def diff_file(file_number: int, subcommand: str) -> None:
+    ext = exts[subcommand]
+    with open(f"f{file_number}.{ext}", "wb") as output_file:
         command = subprocess.run(
             [
                 "./proj1",
-                "hexdump",
+                subcommand,
                 f"{testdir}/f{file_number}",
             ],
             capture_output=True,
@@ -18,16 +22,45 @@ for file_number in range(0, 9):
         output_file.write(command.stdout)
 
     actual = ""
-    with open(f"f{file_number}.hex") as actual_file:
+    with open(f"f{file_number}.{ext}") as actual_file:
         actual = actual_file.read()
 
     expected = ""
-    with open(f"{testdir}/f{file_number}.hex") as test_file:
+    with open(f"{testdir}/f{file_number}.{ext}") as test_file:
         expected = test_file.read()
+
+    print(f"Testing file {file_number}")
 
     if actual != expected:
         print("Actual:")
         print(actual)
         print("Expected:")
         print(expected)
-        raise Exception(f"Test {file_number} failed")
+        raise Exception(f"Test {file_number} for {subcommand} failed")
+
+
+for file_number in [0, 1, 2, 3, 4, 5, 6, 7, 8]:
+    diff_file(file_number, "hexdump")
+
+# FIXME: Test STDIN instead of file input
+for file_number in [9, 10, 11, 12, 13, 14]:
+    diff_file(file_number, "hexdump")
+
+for file_number in [5, 6, 7, 8, 9]:
+    diff_file(file_number, "enc-base64")
+
+# FIXME: Test STDIN instead of file input
+for file_number in [0, 1, 3, 4, 9]:
+    diff_file(file_number, "enc-base64")
+
+for file_number in [5, 6, 7, 9]:
+    diff_file(file_number, "dec-base64")
+
+for file_number in [0, 1, 2, 3, 9]:
+    diff_file(file_number, "dec-base64")
+
+for file_number in [100, 101]:
+    diff_file(file_number, "dec-base64")
+
+for file_number in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]:
+    pass

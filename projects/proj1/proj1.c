@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
       return 1;
     }
   } else if (strcmp(argv[1], ENCODE_COMMAND) == 0) {
-    base64_encode(fd, file_size);
+    base64_encode(fd);
   } else if (strcmp(argv[1], DECODE_COMMAND) == 0) {
     base64_decode(fd, file_size);
     return 1;

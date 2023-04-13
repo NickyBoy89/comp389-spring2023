@@ -26,6 +26,8 @@
 // How many bytes are read at a time from the input file
 #define BUFFER_SIZE 16
 
+typedef unsigned char b64byte;
+
 // base64_char_to_ascii takes in a base64 character value, and returns its
 // ascii representation
 unsigned char base64_char_to_ascii(unsigned char input) {
@@ -69,70 +71,73 @@ unsigned char char_to_base64_ascii(unsigned char input) {
   return 0;
 }
 
-void base64_encode(FILE *fd, int file_size) {
-  int num_bits = sizeof(char) * file_size * BYTE_SIZE;
-  int num_blocks = num_bits / BASE64_BYTE_SIZE;
+#define DISPLAY_LINE_SIZE 64
 
-  // The number of bytes that have been read from the file so far
-  int bytes_read = 0;
+void base64_encode(FILE *fd) {
+  int total_read = 0;
 
-  bool needs_padding = num_bits % BASE64_BYTE_SIZE != 0;
-  // Division always rounds down, so if we need padding, we're always going to
-  // be one block short
-  if (needs_padding) {
-    num_blocks += 1;
-  }
-
-  // base64 is always padded until its block length is a multiple of four
-  int extra_padding =
-      BASE64_ALIGNMENT_AMOUNT - (num_blocks % BASE64_ALIGNMENT_AMOUNT);
-
-  char temp_byte = 0;
+  int total_output = 0;
 
   unsigned char buffer[BUFFER_SIZE];
 
-  // Loop through each bit in the input, and fill `temp_byte` with the first 6
-  // bits
-  for (int i = 0; i < num_bits; i++) {
-    // This is the array index that the current bit is in
-    int data_index = i / BYTE_SIZE;
-    // If we need more bytes, then read the next few bytes from the file into
-    // the buffer
-    if (data_index >= bytes_read) {
-      // If we need to read from the next byte, read the next few from the file
-      int read = fread(buffer, sizeof(unsigned char), BUFFER_SIZE, fd);
-      bytes_read += read;
+  int read = BUFFER_SIZE;
+
+  b64byte current_byte = 0;
+
+  for (int bit_index = 0;; bit_index++) {
+    int array_index = bit_index / BYTE_SIZE;
+
+    if (bit_index > 0 && bit_index % BASE64_BYTE_SIZE == 0) {
+      printf("%c", base64_char_to_ascii(current_byte));
+      total_output++;
+      if (total_output % DISPLAY_LINE_SIZE == 0) {
+        printf("\n");
+      }
+      current_byte = 0;
     }
 
-    // actual_index is the index in the buffer that corresponds to the index in
-    // the array
-    int actual_index = data_index % BUFFER_SIZE;
-    unsigned char current_byte = buffer[actual_index];
-    // `reverse_bit` extracts the ith bit of the current byte, starting from the
-    // most significant bit
-    int reverse_bit =
-        (current_byte & (0x01 << ((BYTE_SIZE - 1) - (i % BYTE_SIZE)))) != 0;
-    // `temp_shift` is the index of the bit in the base64 byte
-    int temp_shift = (BASE64_BYTE_SIZE - 1) - (i % BASE64_BYTE_SIZE);
-    // Set that bit to the extracted bit
-    temp_byte |= reverse_bit << temp_shift;
-    // Once we've filled up a full base64 byte, add it to the array
-    if (i % BASE64_BYTE_SIZE == (BASE64_BYTE_SIZE - 1)) {
-      printf("%c", temp_byte);
-      // Reset it as well
-      temp_byte = 0;
+    if (array_index >= total_read) {
+      read = fread(buffer, sizeof(unsigned char), BUFFER_SIZE, fd);
+      if (ferror(fd)) {
+        perror("Error reading input file");
+        exit(EXIT_FAILURE);
+      }
+      if (read == 0) {
+        if (bit_index % BASE64_BYTE_SIZE != 0) {
+          printf("%c", base64_char_to_ascii(current_byte));
+          total_output++;
+          if (total_output % DISPLAY_LINE_SIZE == 0) {
+            printf("\n");
+          }
+        }
+        break;
+      }
+      total_read += read;
+    }
+
+    int actual_index = array_index % BUFFER_SIZE;
+    int buf_bit_index = 0x01 << ((BYTE_SIZE - 1) - (bit_index % BYTE_SIZE));
+    // printf("%d", (buffer[actual_index] & buf_bit_index) != 0);
+    int bit_value = (buffer[actual_index] & buf_bit_index) != 0;
+    current_byte |=
+        bit_value << ((BASE64_BYTE_SIZE - 1) - (bit_index % BASE64_BYTE_SIZE));
+  }
+
+  int output_size = (total_read * BYTE_SIZE) / BASE64_BYTE_SIZE + 1;
+
+  if (total_read % 3 != 0) {
+    while (output_size % 4 != 0) {
+      printf("%c", BASE64_PADDING_CHARACTER);
+      total_output++;
+      if (total_output % DISPLAY_LINE_SIZE == 0) {
+        printf("\n");
+      }
+      output_size++;
     }
   }
 
-  // If the result was padded, then we'll need to treat the in-progress base64
-  // byte as a full byte, and it's already zero-padded
-  if (needs_padding) {
-    printf("%c", base64_char_to_ascii(temp_byte));
-  }
-
-  // Add padding
-  for (int i = 0; i < extra_padding; i++) {
-    printf("%c", BASE64_PADDING_CHARACTER);
+  if (total_output % DISPLAY_LINE_SIZE != 0) {
+    printf("\n");
   }
 }
 
