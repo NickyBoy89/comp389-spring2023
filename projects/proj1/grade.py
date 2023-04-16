@@ -5,12 +5,16 @@ import subprocess
 
 testdir = "testcases"
 
-exts = {"hexdump": "hex", "enc-base64": "b64"}
+exts = {"hexdump": ".hex", "enc-base64": ".b64", "dec-base64": ".dat"}
+
+test_against = {"hexdump": ".hex", "enc-base64": ".b64", "dec-base64": ""}
 
 
 def diff_file(file_number: int, subcommand: str) -> None:
+    print(f"Testing file {file_number}...")
+
     ext = exts[subcommand]
-    with open(f"f{file_number}.{ext}", "wb") as output_file:
+    with open(f"f{file_number}{ext}", "wb") as output_file:
         command = subprocess.run(
             [
                 "./proj1",
@@ -22,14 +26,12 @@ def diff_file(file_number: int, subcommand: str) -> None:
         output_file.write(command.stdout)
 
     actual = ""
-    with open(f"f{file_number}.{ext}") as actual_file:
+    with open(f"f{file_number}{ext}", "rb") as actual_file:
         actual = actual_file.read()
 
     expected = ""
-    with open(f"{testdir}/f{file_number}.{ext}") as test_file:
+    with open(f"{testdir}/f{file_number}{test_against[subcommand]}", "rb") as test_file:
         expected = test_file.read()
-
-    print(f"Testing file {file_number}")
 
     if actual != expected:
         print("Actual:")

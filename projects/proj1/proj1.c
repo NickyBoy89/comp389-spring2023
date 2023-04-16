@@ -16,6 +16,8 @@ int main(int argc, char *argv[]) {
     return 0;
   }
 
+  // TODO: Add error message for invalid commands
+
   if (argc < 3) {
     printf("ERROR: No files specified to read\n");
     return 1;
@@ -67,7 +69,7 @@ int main(int argc, char *argv[]) {
   } else if (strcmp(argv[1], ENCODE_COMMAND) == 0) {
     base64_encode(fd);
   } else if (strcmp(argv[1], DECODE_COMMAND) == 0) {
-    base64_decode(fd, file_size);
+    base64_decode(fd);
     return 1;
   }
 
