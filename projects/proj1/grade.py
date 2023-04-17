@@ -7,7 +7,17 @@ testdir = "testcases"
 
 exts = {"hexdump": ".hex", "enc-base64": ".b64", "dec-base64": ".dat"}
 
+input_files = {"hexdump": "", "enc-base64": "", "dec-base64": ".b64"}
+
 test_against = {"hexdump": ".hex", "enc-base64": ".b64", "dec-base64": ""}
+
+
+def find_different_bit_index(first: bytes, second: bytes) -> int:
+    iterations = min(len(first), len(second))
+    for index in range(iterations):
+        if first[index] != second[index]:
+            return index
+    return iterations
 
 
 def diff_file(file_number: int, subcommand: str) -> None:
@@ -19,7 +29,7 @@ def diff_file(file_number: int, subcommand: str) -> None:
             [
                 "./proj1",
                 subcommand,
-                f"{testdir}/f{file_number}",
+                f"{testdir}/f{file_number}{input_files[subcommand]}",
             ],
             capture_output=True,
         )
@@ -38,6 +48,9 @@ def diff_file(file_number: int, subcommand: str) -> None:
         print(actual)
         print("Expected:")
         print(expected)
+        print(
+            f"Strings differ on the {find_different_bit_index(actual, expected)} bit out of {len(expected)}"
+        )
         raise Exception(f"Test {file_number} for {subcommand} failed")
 
 
