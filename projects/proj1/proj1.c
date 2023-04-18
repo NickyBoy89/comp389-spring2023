@@ -10,29 +10,53 @@
 #define ENCODE_COMMAND "enc-base64"
 #define DECODE_COMMAND "dec-base64"
 
+enum command_options {
+  HEXDUMP,
+  BASE64_ENCODE,
+  BASE64_DECODE,
+};
+
 int main(int argc, char *argv[]) {
   if (argc < 2) {
     printf("ERROR: No command specified\n");
-    return 0;
+    return EXIT_FAILURE;
   }
 
-  // TODO: Add error message for invalid commands
+  enum command_options command_type;
+
+  if (strcmp(argv[1], HEXDUMP_COMMAND) == 0) {
+    command_type = HEXDUMP;
+  } else if (strcmp(argv[1], ENCODE_COMMAND) == 0) {
+    command_type = BASE64_ENCODE;
+  } else if (strcmp(argv[1], DECODE_COMMAND) == 0) {
+    command_type = BASE64_DECODE;
+  } else {
+    printf("ERROR: Invalid command specified: \"%s\"\n", argv[1]);
+    return EXIT_FAILURE;
+  }
+
+  int read_from_stdin = false;
 
   if (argc < 3) {
-    printf("ERROR: No files specified to read\n");
-    return 1;
+    read_from_stdin = true;
   } else if (argc > 3) {
     printf("WARN: Too many arguments specified, only reading the first "
            "file\n");
   }
 
-  char *input_filename = argv[2];
+  FILE *fd;
 
-  FILE *fd = fopen(input_filename, "rb");
-  if (fd == NULL) {
-    printf("Filename: %s\n", input_filename);
-    perror("Error accessing file");
-    return 1;
+  if (read_from_stdin) {
+    fd = stdin;
+  } else {
+    char *input_filename = argv[2];
+
+    fd = fopen(input_filename, "rb");
+    if (fd == NULL) {
+      printf("Filename: %s\n", input_filename);
+      perror("Error accessing file");
+      return 1;
+    }
   }
 
   // Get the size of the file in bytes
@@ -44,7 +68,8 @@ int main(int argc, char *argv[]) {
 #define HEXDUMP_DATA_SIZE 16
 #define BUFFER_SIZE 16
 
-  if (strcmp(argv[1], HEXDUMP_COMMAND) == 0) {
+  switch (command_type) {
+  case HEXDUMP: {
     int total_read = 0;
     unsigned char line_buffer[HEXDUMP_DATA_SIZE];
     while (total_read < file_size) {
@@ -66,11 +91,13 @@ int main(int argc, char *argv[]) {
       fclose(fd);
       return 1;
     }
-  } else if (strcmp(argv[1], ENCODE_COMMAND) == 0) {
+  } break;
+  case BASE64_ENCODE:
     base64_encode(fd);
-  } else if (strcmp(argv[1], DECODE_COMMAND) == 0) {
+    break;
+  case BASE64_DECODE:
     base64_decode(fd);
-    return 1;
+    break;
   }
 
   fclose(fd);

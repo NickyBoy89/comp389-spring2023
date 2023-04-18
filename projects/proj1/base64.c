@@ -144,25 +144,27 @@ void base64_encode(FILE *fd) {
 void base64_decode(FILE *fd) {
   int total_read = 0;
 
+  // To ignore the newlines
+  int next_expected_newline = DISPLAY_LINE_SIZE;
+  int skip_index = next_expected_newline;
+
   unsigned char buffer[BUFFER_SIZE];
 
   unsigned char current_byte = 0;
 
+  int bit_incremented = 0;
+
+  int has_already_printed = false;
+
+  int padding_amount = 0;
+
+  int read = 0;
+
   for (int bit_index = 0;; bit_index++) {
     int array_index = (bit_index / BASE64_BYTE_SIZE);
 
-    if (bit_index > 0 && bit_index % BYTE_SIZE == 0) {
-      // TODO: Handle padding here becase partial bytes are possible
-      // There are two cases:
-      // 1. There is a padding byte following. In this case the offset needs to
-      // be subtracted
-      // 2. There is no byte following, in this case, the file might be invalid
-      printf("%c", current_byte);
-      current_byte = 0;
-    }
-
     if (array_index >= total_read) {
-      int read = fread(buffer, sizeof(unsigned char), BUFFER_SIZE, fd);
+      read = fread(buffer, sizeof(unsigned char), BUFFER_SIZE, fd);
       if (ferror(fd)) {
         perror("Error reading input file");
         exit(EXIT_FAILURE);
@@ -176,26 +178,61 @@ void base64_decode(FILE *fd) {
 
     int actual_index = array_index % BUFFER_SIZE;
 
-    // Technically just ignores all newlines, but still works for now
-    if (buffer[actual_index] == '\n') {
-      continue;
-    }
-
     if (buffer[actual_index] == BASE64_PADDING_CHARACTER) {
-      printf("Padding!");
+      bit_incremented -= 2;
       break;
     }
 
+    if (array_index != skip_index) {
+      if (bit_incremented > 0 && bit_incremented % BYTE_SIZE == 0) {
+        if (!has_already_printed) {
+          has_already_printed = true;
+          // TODO: Handle padding here becase partial bytes are possible
+          // There are two cases:
+          // 1. There is a padding byte following. In this case the offset needs
+          // to be subtracted
+          // 2. There is no byte following, in this case, the file might be
+          // invalid
+          printf("%c", current_byte);
+          current_byte = 0;
+        }
+      } else {
+        has_already_printed = false;
+      }
+    }
+
+    if (read != BUFFER_SIZE) {
+      if (read == actual_index + 1) {
+        continue;
+      }
+    }
+
+    if (array_index == next_expected_newline) {
+      // printf("Ignoring newline at index %d\n", array_index);
+      skip_index = array_index;
+      next_expected_newline = next_expected_newline + DISPLAY_LINE_SIZE + 1;
+      // printf("Next newline to be skipped will be at index %d\n",
+      //        next_expected_newline);
+    }
+
+    if (array_index == skip_index) {
+      // printf("Skipping character at index %d\n", array_index);
+      continue;
+    }
+
     int extracted_bit =
-        0x01 << ((BASE64_BYTE_SIZE - 1) - (bit_index % BASE64_BYTE_SIZE));
+        0x01 << ((BASE64_BYTE_SIZE - 1) - (bit_incremented % BASE64_BYTE_SIZE));
     // printf("Character %d is [%c], decoded %.6b\n", array_index,
-    //        buffer[actual_index], char_to_base64_ascii(buffer[actual_index]));
+    //        buffer[actual_index],
+    //        char_to_base64_ascii(buffer[actual_index]));
     int bit_value =
         (char_to_base64_ascii(buffer[actual_index]) & extracted_bit) != 0;
     // printf("Extract bit is %x, data: %d\n", extracted_bit, bit_value);
 
     // printf("Bit at index %d is %d\n", bit_index, bit_value);
 
-    current_byte |= bit_value << ((BYTE_SIZE - 1) - (bit_index % BYTE_SIZE));
+    current_byte |= bit_value
+                    << ((BYTE_SIZE - 1) - (bit_incremented % BYTE_SIZE));
+    bit_incremented++;
   }
 }

@@ -25,6 +25,3 @@ hexdump.o: hexdump.c hexdump.h
 clean:
 	-rm $(PROJ)
 	-rm $(OBJS)
-	-rm *.hex
-	-rm *.b64
-	-rm *.dat
