@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #define BYTES_PER_ROW 16
 
@@ -13,19 +14,34 @@
 #define FILLER_CHARACTER '.'
 #define INVALID_CHARACTER '~'
 
-void hexdump_data(const unsigned char data[], int data_size, int start_byte) {
-  int row_counter = start_byte;
-  for (int row = 0; row < data_size; row += BYTES_PER_ROW) {
+void hexdump_data(FILE *fd) {
+  unsigned char buffer[BYTES_PER_ROW];
+
+  int read = BYTES_PER_ROW;
+  for (int row_counter = 0; read == BYTES_PER_ROW;
+       row_counter += BYTES_PER_ROW) {
+
+    read = fread(buffer, sizeof(unsigned char), BYTES_PER_ROW, fd);
+    if (ferror(fd)) {
+      perror("There was an error reading the input file");
+      fclose(fd);
+      exit(EXIT_FAILURE);
+    }
+
+    if (read == 0) {
+      break;
+    }
+
     // Print out the row counter
     printf("%.6x: ", row_counter);
 
     // Print the hex of every 16 bytes
     for (int current_byte = 0; current_byte < BYTES_PER_ROW; current_byte++) {
       // Replace anything blank with padding characters
-      if (row + current_byte >= data_size) {
+      if (current_byte >= read) {
         printf("-- ");
       } else {
-        printf("%.2x ", data[row + current_byte]);
+        printf("%.2x ", buffer[current_byte]);
       }
 
       // Put a space halfway in between both columns
@@ -39,13 +55,13 @@ void hexdump_data(const unsigned char data[], int data_size, int start_byte) {
 
     // Print the string representation of the bits
     for (int current_byte = 0; current_byte < BYTES_PER_ROW; current_byte++) {
-      char character = data[row + current_byte];
-
       // Don't print out the padding bytes
-      if (current_byte >= data_size) {
+      if (current_byte >= read) {
         printf(" ");
         continue;
       }
+
+      char character = buffer[current_byte];
 
       if (character >= ' ' && character <= '~') {
         // Only print out the characters that work
@@ -60,6 +76,5 @@ void hexdump_data(const unsigned char data[], int data_size, int start_byte) {
 
     // Go to the next line
     printf("\n");
-    row_counter += BYTES_PER_ROW;
   }
 }

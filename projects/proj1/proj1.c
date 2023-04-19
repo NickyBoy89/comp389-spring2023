@@ -10,6 +10,11 @@
 #define ENCODE_COMMAND "enc-base64"
 #define DECODE_COMMAND "dec-base64"
 
+// Hexdump spacing
+#define BYTES_PER_ROW 16
+#define HEXDUMP_DATA_SIZE 16
+#define BUFFER_SIZE 16
+
 enum command_options {
   HEXDUMP,
   BASE64_ENCODE,
@@ -59,39 +64,10 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  // Get the size of the file in bytes
-  fseek(fd, 0, SEEK_END);
-  int file_size = ftell(fd);
-  rewind(fd);
-
-#define BYTES_PER_ROW 16
-#define HEXDUMP_DATA_SIZE 16
-#define BUFFER_SIZE 16
-
   switch (command_type) {
-  case HEXDUMP: {
-    int total_read = 0;
-    unsigned char line_buffer[HEXDUMP_DATA_SIZE];
-    while (total_read < file_size) {
-      for (int i = 0; i < HEXDUMP_DATA_SIZE; i++) {
-        line_buffer[i] = 0;
-      }
-      int read =
-          fread(line_buffer, sizeof(unsigned char), HEXDUMP_DATA_SIZE, fd);
-      if (ferror(fd)) {
-        perror("Error reading data from file");
-        fclose(fd);
-        return 1;
-      }
-      hexdump_data(line_buffer, read, total_read);
-      total_read += read;
-    }
-    if (total_read != file_size) {
-      printf("ERROR: Read %d bytes, but expected %d\n", total_read, file_size);
-      fclose(fd);
-      return 1;
-    }
-  } break;
+  case HEXDUMP:
+    hexdump_data(fd);
+    break;
   case BASE64_ENCODE:
     base64_encode(fd);
     break;

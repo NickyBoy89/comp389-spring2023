@@ -45,7 +45,7 @@ unsigned char base64_char_to_ascii(unsigned char input) {
   case BASE64_SLASH:
     return '/';
   }
-  printf("Unknown base64 conversion from character [%c]\n", input);
+  printf("ERROR: Unknown base64 conversion from character [%c]\n", input);
   exit(EXIT_FAILURE);
 }
 
@@ -67,7 +67,7 @@ unsigned char char_to_base64_ascii(unsigned char input) {
     return BASE64_SLASH;
   }
 
-  printf("Unknown base64 character value for character '%c'\n", input);
+  printf("ERROR: Unknown base64 character value for character '%c'\n", input);
   exit(EXIT_FAILURE);
 }
 
@@ -155,8 +155,6 @@ void base64_decode(FILE *fd) {
   int bit_incremented = 0;
 
   int has_already_printed = false;
-
-  int padding_amount = 0;
 
   int read = 0;
 
