@@ -22,6 +22,12 @@ base64.o: base64.c base64.h
 hexdump.o: hexdump.c hexdump.h
 	$(CC) $(CFLAGS) -c hexdump.c
 
+.PHONY: clean, package
 clean:
 	-rm $(PROJ)
 	-rm $(OBJS)
+
+package:
+	echo "Packaging files for submission..."
+	tar -czvf proj1.tar.gz *.c *.h Makefile README.md
+	echo "Done!"
