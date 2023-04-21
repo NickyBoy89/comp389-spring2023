@@ -1,3 +1,4 @@
+#include <limits.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -145,8 +146,7 @@ void base64_decode(FILE *fd) {
   int total_read = 0;
 
   // To ignore the newlines
-  int next_expected_newline = DISPLAY_LINE_SIZE;
-  int skip_index = next_expected_newline;
+  int skip_index = INT_MAX;
 
   unsigned char buffer[BUFFER_SIZE];
 
@@ -167,7 +167,6 @@ void base64_decode(FILE *fd) {
         perror("Error reading input file");
         exit(EXIT_FAILURE);
       }
-      // printf("Read %d bytes\n", read);
       if (read == 0) {
         break;
       }
@@ -185,12 +184,6 @@ void base64_decode(FILE *fd) {
       if (bit_incremented > 0 && bit_incremented % BYTE_SIZE == 0) {
         if (!has_already_printed) {
           has_already_printed = true;
-          // TODO: Handle padding here becase partial bytes are possible
-          // There are two cases:
-          // 1. There is a padding byte following. In this case the offset needs
-          // to be subtracted
-          // 2. There is no byte following, in this case, the file might be
-          // invalid
           printf("%c", current_byte);
           current_byte = 0;
         }
@@ -205,29 +198,18 @@ void base64_decode(FILE *fd) {
       }
     }
 
-    if (array_index == next_expected_newline) {
-      // printf("Ignoring newline at index %d\n", array_index);
+    if (buffer[actual_index] == '\n') {
       skip_index = array_index;
-      next_expected_newline = next_expected_newline + DISPLAY_LINE_SIZE + 1;
-      // printf("Next newline to be skipped will be at index %d\n",
-      //        next_expected_newline);
     }
 
     if (array_index == skip_index) {
-      // printf("Skipping character at index %d\n", array_index);
       continue;
     }
 
     int extracted_bit =
         0x01 << ((BASE64_BYTE_SIZE - 1) - (bit_incremented % BASE64_BYTE_SIZE));
-    // printf("Character %d is [%c], decoded %.6b\n", array_index,
-    //        buffer[actual_index],
-    //        char_to_base64_ascii(buffer[actual_index]));
     int bit_value =
         (char_to_base64_ascii(buffer[actual_index]) & extracted_bit) != 0;
-    // printf("Extract bit is %x, data: %d\n", extracted_bit, bit_value);
-
-    // printf("Bit at index %d is %d\n", bit_index, bit_value);
 
     current_byte |= bit_value
                     << ((BYTE_SIZE - 1) - (bit_incremented % BYTE_SIZE));
