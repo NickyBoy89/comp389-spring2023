@@ -24,6 +24,19 @@
           N = 1000 = pq
         \]
 
+        Due to Euler's totient:
+        \[
+          \phi(100) = 100\left(1 - \frac{1}{2}\right)\left(1 - \frac{1}{5}\right) = 40
+        \]
+
+        Then, we can get:
+
+        \begin{align*}
+          3 \in \mathbb{Z}^{*}_{100} &\to 3\phi(100) = 1 \pmod{100}\\
+                3^{40} &= 1 \pmod{100}\\
+          3^{40 * 25} &= 1^{25} \equiv 1 \pmod{100} = \boxed{01}
+        \end{align*}
+
       \item $[101^{4,800,000,023} \mod 35]$.
 
         \begin{align*}
@@ -78,8 +91,7 @@
       N\right] \mod p\right] = \left[X \mod p\right]$
     \end{proof}
 
-  \item Show that, in contrast, $[[X \mod p ] \mod N ]$ need not equal $[X \mod N
-    ]$.
+    Show that, in contrast, $[[X \mod p ] \mod N ]$ need not equal $[X \mod N]$.
 
     \begin{proof}
       Suppose towards contradiction that $\forall p, N \in \mathbb{Z}$
@@ -150,6 +162,15 @@
       \item \textsf{Gen}: on input $1^n$, run $\textsf{GenRSA}(1^n)$ to obtain
         $N, e, d$, and select $y \leftarrow \mathbb{Z}^{*}_N$. The key is $s := \left<N, e,
         y\right>$.
+
+        \begin{proof}
+          Suppose the RSA problem is hard relative to \textsf{GenRSA}. Then
+          \textsf{GenRSA} cannot solve \textsf{RSA} in polynomial time. So, it
+          \textsf{GenRSA} is restricted to polynomial time, it cannot solve
+          \textsf{RSA}. This implies that the probability of the experiment
+          succeeding is negligible.
+        \end{proof}
+
       \item \textsf{H}: if $s = \left<N, e, y\right>$ , then $H^s$ maps inputs
         in $\left\{0, 1\right\}^{3n}$ to outputs in $\mathbb{Z}^{*}_N$. Let $f_0^s(x) :=
         [x^e \mod N]$ and $f_1^s(x) := [y \cdot x^e \mod N]$. For a $3n$-bit long
@@ -161,6 +182,19 @@
 
         Prove that if the RSA problem is hard relative to \textsf{GenRSA} than
         $H$ is a fixed-length collision-resistant hash function.
+
+        \begin{proof}
+          So, \textsf{GenRSA} provides $N, e, d$ and \textsf{Gen}, as well as $y
+          \leftarrow \mathbb{Z}^{*}_{N}$.
+
+          This is used by $H^S$ to map $\left\{0, 1\right\}^{3n}$ to
+          $\mathbb{Z}^{*}_{N}$. For a collision to occur, two distinct inputs
+          must map to the same output. This occurs only when the identity
+          element in the group is provided.
+
+          Since $\mathbb{Z}^{*}_N$ has a unique identity there is no collision.
+        \end{proof}
+
     \end{enumerate}
 \end{enumerate}
 
