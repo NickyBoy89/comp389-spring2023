@@ -7,7 +7,7 @@
 
 \title{Homework 4}
 \date{}
-\author{Nicholas Novak}
+\author{Nicholas Novak, Yash Karandikar, Jadriel Delim, Elise Corwin}
 
 \begin{document}
 \maketitle
@@ -128,6 +128,12 @@
   \item 
     \begin{enumerate}
       \item Formally define the CDH assumption
+
+      Given g, $h_1, h_2$ compute $DH_g(h_1, h_2)$ where $h_1$ and $h_2$ are given randomly chosen $h_1$ and $h_2$ and g is a generator that is a cyclic group G. 
+      If the discrete log problem in G is easy then the CDH problem is also easy. 
+      Given $h_1$ and $h_2$:
+      1. Compute DH($h_1$, $h_2$)
+      
       \item Prove that hardness of the CDH problem relative to $\mathcal{G}$ implies
         hardness of the discrete-logarithm problem relative to $\mathcal{G}$.
       \item Prove that hardness of the DDH problem relative to $\mathcal{G}$
