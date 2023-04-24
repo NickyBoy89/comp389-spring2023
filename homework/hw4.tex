@@ -1,0 +1,161 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+
+\title{Homework 4}
+\date{}
+\author{Nicholas Novak}
+
+\begin{document}
+\maketitle
+
+\begin{enumerate}
+  \item Compute the following by hand.
+    \begin{enumerate}
+      \item The final two (decimal) digits of $3^{1000}$.
+
+        To find the last two digits, we can find the number mod 100, i.e.
+        $3^{1000} \mod 100$
+
+        \[
+          N = 1000 = pq
+        \]
+
+      \item $[101^{4,800,000,023} \mod 35]$.
+
+        \begin{align*}
+          [101^{4,800,000,023} \mod 35] &=\\
+          [101 \mod 5][101 \mod 7] &=\\
+          (1, [3 \mod 7])
+        \end{align*}
+
+        \begin{align*}
+          (1, [3 \mod 7])^{4,800,000,023} &\equiv (1, [3 \mod 7])\\
+                                          &\equiv (1, [3 \mod 7])^{[23 \mod
+                                          6]}\\
+                                          &\equiv (1, [3 \mod 7])^5\\
+                                          &\equiv (1^5, [3^5 \mod 7])\\
+                                          &\equiv (1, 5)
+        \end{align*}
+
+        \begin{align*}
+          (1, 5) &\equiv 1(1, 0) + 5(0, 1)\\
+                 &\equiv [1 * 1p + 5 * 1q \mod 35]\\
+                 &\equiv [5 + 35 \mod 35]\\
+                 &\equiv \boxed{5}
+        \end{align*}
+
+    \end{enumerate}
+  \item Let $p, N$ be integers with $p | N$ . Prove that for any integer $X$,
+    \[
+      [[X \mod N ] \mod p ] = [X \mod p ].
+    \]
+
+    \begin{proof}
+      Let $p, N \in \mathbb{Z}$ with $p \mid N$. By assumption $X \in \mathbb{Z}$.
+
+      Consider $\left[\left[X \mod N\right] \mod p\right]$.
+
+      Let $b = \left[X \mod N\right]$. Let $X = aN + b$ for any $a \in
+      \mathbb{Z}$.
+
+      Then, $\left[\left[X \mod N\right] \mod p\right] = \left[b \mod p\right]$.
+
+      Then, consider $\left[X \mod p\right]$.
+
+      Now, $\left[X \mod p\right] = \left[(aN + b) \mod p\right]$.
+
+      Since $p \mid N, p \mid aN$ for some $a \in \mathbb{Z}$.
+
+      So, $\left[x \mod p\right] = \left[(aN + b) \mod p\right] = \left[b \mod
+      p\right]$.
+
+      Since $\left[\left[X \mod N\right] \mod p\right] = \left[b \mod p\right]$
+      and $\left[X \mod p\right] = \left[b \mod p\right]$, $\left[\left[X \mod
+      N\right] \mod p\right] = \left[X \mod p\right]$
+    \end{proof}
+
+  \item Show that, in contrast, $[[X \mod p ] \mod N ]$ need not equal $[X \mod N
+    ]$.
+
+    \begin{proof}
+      Suppose towards contradiction that $\forall p, N \in \mathbb{Z}$
+      $\left[\left[X \mod p\right] \mod N\right] = \left[X \mod N\right]$.
+
+      Let $b = \left[X \mod p\right]$. Let $X = bN + a$.
+
+      Then $\left[\left[X \mod p\right] \mod N\right] = b \mod N$, but $\left[X
+      \mod N\right] = \left[(bN + a) \mod N\right]$, and since $N \mid bN$ for
+      some $b \in \mathbb{Z}$, $\left[(bN + a) \mod N\right] = \left[a \mod
+      N\right]$.
+
+      So, for some value of $a, b \in \mathbb{Z}$, if $x = bN + a, \left[\left[X
+      \mod p\right] \mod N\right] \neq \left[X \mod N\right]$.
+
+      Therefore, we can see that no such $X$ exists.
+    \end{proof}
+
+  \item Show the following.
+    \begin{enumerate}
+      \item If $N = pq$ and $ed = 1 \mod \phi(N)$ then for all $x \in Z^{*}_N$ 
+        we have $(x^e)^d = x \mod N$
+
+        \begin{proof}
+          Let $p, q \in \mathbb{Z}$ such that $p, q$ are distinct primes. $N =
+          pq$. Let $e, d \in \mathbb{Z}$ such that $ed \equiv 1 \pmod{\phi(N)}$.
+          Consider $\phi(N)$.
+
+          Since $N$ is composite, $\phi(N) = (p - 1)(q - 1)$.
+
+          Since $ed \equiv 1 \pmod{\phi(N)}$, $ed \equiv \pmod{(p - 1)(q - 1)}$,
+          so $ed \equiv 1 + (p - 1)(q - 1)k$, for some $k \in \mathbb{Z}$.
+
+          Now consider, $x^{ed}$. $x^{ed} = x^{(p - 1)(q - 1) + 1} = x^{(p -
+            1)}x^{(q - 1)}x$
+
+          Now, since $p - 1$ and $q - 1$ are inverses ($\mod (p - 1)(q - 1)$),
+          $x^{p - 1}x^{q - 1}x = 1 * 1 * x = x$.
+
+          So, $x^{ed} = x$.
+         \end{proof}
+
+      \item If $N = pq$ and $ed = 1 \mod \phi(N)$ then for all $x \in Z_N$ we
+        have $(x^e)^d = x \mod N$.
+    \end{enumerate}
+  \item 
+    \begin{enumerate}
+      \item Formally define the CDH assumption
+      \item Prove that hardness of the CDH problem relative to $\mathcal{G}$ implies
+        hardness of the discrete-logarithm problem relative to $\mathcal{G}$.
+      \item Prove that hardness of the DDH problem relative to $\mathcal{G}$
+        implies hardness of the CDH problem relative to $\mathcal{G}$.
+    \end{enumerate}
+  \item Let \textsf{GenRSA} be a probabilistic polynomial-time algorithm that,
+    on input $1^n$, outputs a modulus $N$ that is the product of two $n$-bit 
+    primes, as well as integers $e, d > 0$ with $\gcd(e, \phi(N)) = 1$ and 
+    $ed = 1 \mod \phi(N)$.
+
+    Define $(\textsf{Gen}, H)$ as follows:
+
+    \begin{enumerate}
+      \item \textsf{Gen}: on input $1^n$, run $\textsf{GenRSA}(1^n)$ to obtain
+        $N, e, d$, and select $y \leftarrow \mathbb{Z}^{*}_N$. The key is $s := \left<N, e,
+        y\right>$.
+      \item \textsf{H}: if $s = \left<N, e, y\right>$ , then $H^s$ maps inputs
+        in $\left\{0, 1\right\}^{3n}$ to outputs in $\mathbb{Z}^{*}_N$. Let $f_0^s(x) :=
+        [x^e \mod N]$ and $f_1^s(x) := [y \cdot x^e \mod N]$. For a $3n$-bit long
+        string $x = x_1 \dots x_{3n}$, define
+
+        \[
+          H^s(x) := f_{x_1}^s(f_{x_2}^s(\dots(1)\dots)).
+        \]
+
+        Prove that if the RSA problem is hard relative to \textsf{GenRSA} than
+        $H$ is a fixed-length collision-resistant hash function.
+    \end{enumerate}
+\end{enumerate}
+
+\end{document}
