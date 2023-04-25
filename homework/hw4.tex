@@ -202,14 +202,6 @@
         $N, e, d$, and select $y \leftarrow \mathbb{Z}^{*}_N$. The key is $s := \left<N, e,
         y\right>$.
 
-        \begin{proof}
-          Suppose the RSA problem is hard relative to \textsf{GenRSA}. Then
-          \textsf{GenRSA} cannot solve \textsf{RSA} in polynomial time. So, it
-          \textsf{GenRSA} is restricted to polynomial time, it cannot solve
-          \textsf{RSA}. This implies that the probability of the experiment
-          succeeding is negligible.
-        \end{proof}
-
       \item \textsf{H}: if $s = \left<N, e, y\right>$ , then $H^s$ maps inputs
         in $\left\{0, 1\right\}^{3n}$ to outputs in $\mathbb{Z}^{*}_N$. Let $f_0^s(x) :=
         [x^e \mod N]$ and $f_1^s(x) := [y \cdot x^e \mod N]$. For a $3n$-bit long
@@ -223,6 +215,11 @@
         $H$ is a fixed-length collision-resistant hash function.
 
         \begin{proof}
+          Suppose the RSA problem is hard relative to \textsf{GenRSA}. Then
+          \textsf{GenRSA} cannot solve \textsf{RSA} in polynomial time. So, it
+          \textsf{GenRSA} is restricted to polynomial time, it cannot solve
+          \textsf{RSA}. This implies that the probability of the experiment
+          succeeding is negligible.
           So, \textsf{GenRSA} provides $N, e, d$ and \textsf{Gen}, as well as $y
           \leftarrow \mathbb{Z}^{*}_{N}$.
 
