@@ -21,6 +21,22 @@ class KnownFactorableInt:
         raise Exception(f"Number {number} has no known factors")
 
 
+def is_prime(num: int) -> bool:
+    prime_flag = 0
+
+    if num > 1:
+        for i in range(2, int(math.sqrt(num)) + 1):
+            if num % i == 0:
+                prime_flag = 1
+                break
+        if prime_flag == 0:
+            return True
+        else:
+            return False
+    else:
+        return False
+
+
 def remainder(number: int, power: int, modulus: KnownFactorableInt) -> int:
     # Split the number into two mods
     xm = number % modulus.first
@@ -29,9 +45,13 @@ def remainder(number: int, power: int, modulus: KnownFactorableInt) -> int:
     print(f"[{xm}^{{{power}}} mod {modulus.first}]")
     print(f"[{ym}^{{{power}}} mod {modulus.second}]")
 
+    px = power
+    py = power
     # Next, reduce the power
-    px = power % (modulus.first - 1)
-    py = power % (modulus.second - 1)
+    if is_prime(modulus.first):
+        px = power % (modulus.first - 1)
+    if is_prime(modulus.second):
+        py = power % (modulus.second - 1)
     print(f"Reduce the power by the order (p - 1) or (q - 1)")
     print(f"[{xm}^{{{px}}} mod {modulus.first}]")
     print(f"[{ym}^{{{py}}} mod {modulus.second}]")
@@ -61,8 +81,9 @@ def naive(number: int, power: int, modulus: KnownFactorableInt) -> int:
     return (number**power) % modulus.num()
 
 
-print(remainder(3, 1000, KnownFactorableInt.factor_from(100)))
-print(naive(3, 1000, KnownFactorableInt.factor_from(100)))
+if __name__ == "__main__":
+    print(remainder(3, 1000, KnownFactorableInt.factor_from(100)))
+    print(naive(3, 1000, KnownFactorableInt.factor_from(100)))
 
-print(remainder(101, 4_800_000_023, KnownFactorableInt.factor_from(35)))
-print(naive(101, 4_800_000_023, KnownFactorableInt.factor_from(35)))
+    print(remainder(101, 4_800_000_023, KnownFactorableInt.factor_from(35)))
+    print(naive(101, 4_800_000_023, KnownFactorableInt.factor_from(35)))
