@@ -1,0 +1,155 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+
+\DeclareMathOperator{\Enc}{\textsf{Enc}}
+
+\newtheorem{analysis}{Analysis}
+
+\title{Homework 5}
+\date{4 May 2023}
+\author{Nicholas Novak (), Yash Karandikar (),\\
+Elise Corwin (), Jadriel Delim ()}
+
+\begin{document}
+\maketitle
+
+\begin{enumerate}
+  \item Consider the following key-exchange protocol:
+    \begin{enumerate}
+      \item Alice chooses uniform $k, r \in \left\{0, 1\right\}^n$, and sends $s
+        := k \oplus r$ to Bob.
+      \item Bob chooses uniform $t \in \left\{0, 1\right\}^n$, and sends $u :=
+        s \oplus t$ to Alice.
+      \item Alice computes $w := u \oplus r$ and sends $w$ to Bob.
+      \item Alice outputs $k$ and Bob outputs $w \oplus t$.
+    \end{enumerate}
+
+    Show that Alice and Bob output the same key. Analyze the security of
+    scheme (i.e. either prove its security or show a concrete attack).
+
+    \begin{analysis}
+      Consider the following key exchange. Alice chooses uniform $k, r \in
+      \left\{0, 1\right\}^n$ and sends Bob $k \oplus r$. Bob chooses uniform $t
+      \in \left\{0, 1\right\}^n$ and sends $k \oplus r \oplus t$ back. Then
+      Alice computes $k \oplus r \oplus t \oplus r$, which is $k \oplus t$, and
+      sends it back to Bob. Alice outputs $k$ and Bob outputs $k \oplus t \oplus
+      t$ which is $k$. So, they output the same key.
+    \end{analysis}
+
+    \begin{proof}
+      Consider a replay attack. Let $\mathcal{A}$ be a PPT adversary who
+      intercepts Alice's initial message and replays it (such that Bob receives
+      it twice). Then, Bob receives $k \oplus r \oplus k \oplus r$ where $k, r
+      \in \left\{0, 1\right\}^n$. Bob chooses uniform $t \in \left\{0,
+      1\right\}^n$ and sends back $k \oplus r \oplus k \oplus r \oplus t$.
+
+      Alice then sends $k \oplus r \oplus k \oplus r \oplus t \oplus r$, which
+      is $r \oplus t$. Bob outputs $r \oplus t \oplus t$, which is $r$, but
+      Alice outputs $k$. Therefore, the scheme is broken.
+    \end{proof}
+
+  \item Consider the following invariant of El Gamal encryption. Let $p = 2q +
+    1$, let $\mathbb{G}$ be the group of squares modulo $p$ (so $\mathbb{G}$
+    is a subgroup of $\mathbb{Z}^{*}_p$ of order $q$), and let $g$ be a
+    generator of $\mathbb{G}$. The private key is $(\mathbb{G}, g, q, x)$ and
+    the public key is $(\mathbb{G}, g, q, h)$, where $h = g^x$ and $x \in
+    \mathbb{Z}_q$ is chosen uniformly. To encrypt a message $m \in
+    \mathbb{Z}_q$, choose a uniform $r \in \mathbb{Z}_q$, compute $c_1 := g^r
+    \mod p$ and $c_2 := h^r + m \mod p$, and let the ciphertext be $\left<c_1,
+    c_2\right>$. Is this scheme CPA-secure? Prove your answer.
+
+    \begin{proof}
+      Generate a public key $(\mathbb{G}, g, q, h)$ where $g$ is a generator of
+      $\mathbb{G}$, $q$ is the prime order, and $h = g^x$.
+
+      The private key is given as $(\mathbb{G}, g, q, x)$, where $x$ is uniform.
+
+      Fix some encryption oracle $\Enc(\cdot)$ that does the following steps:
+      \begin{enumerate}
+        \item On input $m, g, p, h$ and $r \in \mathbb{Z}$, output
+
+          \[
+            \left<c_1, c_2\right> = \left<g^r \pmod{p}, h^r + m \pmod{p}\right>
+          \]
+      \end{enumerate}
+
+      The attacker receives a message-ciphertext pair $\left<m, c\right>$:
+
+      Choose two messages $m_1 = a \nmid h$ and $m_2 = b \mid h$.
+
+      Calculate the ciphertext $c_1$ normally, and calculate $c_2$ as follows:
+      \begin{enumerate}
+        \item $h^r + m_1 \pmod{p}$
+
+          \begin{align*}
+            h^r + m_2 \pmod{p} &=\\
+            h^r + m_2 \pmod{2q + 1} &=\\
+          \end{align*}
+      \end{enumerate}
+    \end{proof}
+
+  \item Consider the RSA encryption function $E(x) = x^e \mod n$ where $n = pq$
+    with $p$ and $q$ being two distinct prime numbers, and $\gcd(e, (p - 1), (q
+    - 1)) = 1$. Let $D(x)$ be the corresponding decryption function such that
+    $D(E(x)) = x$ for all $x \in \mathbb{Z}^{*}_n$. Suppose $eh = 1 \mod p - 1$.
+    Show that $D(x) = x^h \mod p$.
+  \item
+    \begin{enumerate}
+      \item In class we showed an attack on the plain RSA signature scheme in
+        which an attacker forges a signature on an arbitrary message using two
+        different signing queries. Show how an attacker can forge a signature on
+        an arbitrary message using a single signing query.
+
+        \begin{proof}
+          Let $p, q \in \mathbb{Z}^{+}$ be distinct primes. Let $N \in
+          \mathbb{Z}$ such that $N = pq$. Let $e, d \in \mathbb{Z}^{+}$ such
+          that $ed \equiv 1 \pmod{\phi(N)}$. Let $m \in \mathbb{Z}^{*}_n$.
+          Suppose an attacker $\mathbb{A}$ has an arbitrary message $m$.
+          Consider $\sigma$ such that $\sigma = \left[m \mod N\right]$.
+
+          This is one signing query. Now, construct $\sigma'$ such that $\sigma'
+          = \sigma * \sigma = \left[m * m \mod N\right]$. With exactly one
+          signing query, we have forged a signature.
+        \end{proof}
+      \item Assume the RSA problem is hard. Show that the plain RSA signature
+        scheme satisfies the following weak definition of security: an attacker
+        is given the public key $\left<N, e\right>$ and a uniform message $m \in
+        \mathbb{Z}^{*}_N$. The adversary succeeds if it can output a valid
+        signature on $m$ without making any signing queries.
+
+        \begin{proof}
+          Suppose that the RSA problem is hard. Then RSA cannot be solved in
+          polynomial time. Consider an experiment in which an attacker
+          $\mathcal{A}$ is given a public key $\left<N, e\right>$ and uniform $m
+          \in \mathbb{Z}^{*}_N$. Since RSA cannot be solved in polynomial time,
+          $\mathcal{A}$ must make some queries to the
+          $\textsf{Sign}_{sk}(\cdot)$ oracle to create a $(m, \gamma)$ pair to
+          forge. This information is provided to the oracle, implies that $m \in
+          \mathcal{M}$ and $\mathcal{A}$ cannot provide $m$ as output in the
+          experiment. Furthermore, $\mathcal{A}$ cannot bear RSA by chance
+          (since we supposed RSA is hard). Since $\mathcal{A}$ cannot succeed,
+          the plain RSA scheme satisfies the weak definition of security.
+        \end{proof}
+    \end{enumerate}
+  \item Consider a variant of DSA as follows: $p$ and $q$ are prime where $q$
+    divides $p - 1$, and $\alpha \in \mathbb{Z}^{*}_p$ is of order $q$. Alice chooses
+    some secret $a$ as the private signing key and the public verification key
+    is $\beta = \alpha^a \mod p$. The public parameters are $p, q, \alpha$ and a
+    collision resistant hash function $h$. To sign a message $x$, Alice computes
+    $y = h(x)$ and generates a random secret $k, 1 \leq k \leq q - 1$. Then
+    signature is $\left<r, s\right>$ where $r = (\alpha^k \mod p) \mod q$, and
+    $s = k - rya \mod q$.
+    \begin{enumerate}
+      \item Describe how a signature $\left<r, s\right>$ on a message $x$ can be
+        publicly verified.
+      \item Is it secure to use the same $k$ to sign two different messages and
+        why?
+    \end{enumerate}
+\end{enumerate}
+
+\end{document}
