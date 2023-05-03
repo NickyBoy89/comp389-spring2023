@@ -64,33 +64,20 @@ Elise Corwin (), Jadriel Delim ()}
     c_2\right>$. Is this scheme CPA-secure? Prove your answer.
 
     \begin{proof}
-      Generate a public key $(\mathbb{G}, g, q, h)$ where $g$ is a generator of
-      $\mathbb{G}$, $q$ is the prime order, and $h = g^x$.
+      Let $p, q \in \mathbb{Z}^{+}$ such that $p, q$ are distinct and $p = 2q +
+      1$. Let $\mathcal{G}$ be the subgroup of $\mathbb{Z}_p^{*}$ of order $q$.
+      Let $m, r \in \mathbb{Z}_q$. Compute $c_1 := g^r \mod{p}$ and $c_2 := h_r
+      + m \mod p$. Suppose $h^r + m_1 \mod p \in \mathbb{Z}_p^{*}$. For the
+      scheme to be CPA-secure, two messages $m_1, m_2 \in \mathbb{Z}_q$ and
+      their $\delta$ counterparts $(m_b, \delta)$ need to be indistinguishable.
 
-      The private key is given as $(\mathbb{G}, g, q, x)$, where $x$ is uniform.
-
-      Fix some encryption oracle $\Enc(\cdot)$ that does the following steps:
-      \begin{enumerate}
-        \item On input $m, g, p, h$ and $r \in \mathbb{Z}$, output
-
-          \[
-            \left<c_1, c_2\right> = \left<g^r \pmod{p}, h^r + m \pmod{p}\right>
-          \]
-      \end{enumerate}
-
-      The attacker receives a message-ciphertext pair $\left<m, c\right>$:
-
-      Choose two messages $m_1 = a \nmid h$ and $m_2 = b \mid h$.
-
-      Calculate the ciphertext $c_1$ normally, and calculate $c_2$ as follows:
-      \begin{enumerate}
-        \item $h^r + m_1 \pmod{p}$
-
-          \begin{align*}
-            h^r + m_2 \pmod{p} &=\\
-            h^r + m_2 \pmod{2q + 1} &=\\
-          \end{align*}
-      \end{enumerate}
+      Since we supposed $h^r + m_1 \mod p \in \mathbb{Z}_p^{*}$, show that $h^r
+      - m$, so the message $\delta$ pairs are distinguishable. Now, since
+      $\mathcal{G}$ is a subgroup of $\mathbb{Z}_p^{*}$, $(h^r + m_1) \mod p
+      \in \mathbb{Z}_p^{*}$ (Since the group is of order $q$). So, for distinct
+      $m_1, m_2 \in \mathbb{Z}_p^{*}$, we have the same $\delta$. That means
+      that the messages are not indistinguishable, so the scheme is not
+      CPA-secure.
     \end{proof}
 
   \item Consider the RSA encryption function $E(x) = x^e \mod n$ where $n = pq$
@@ -98,6 +85,28 @@ Elise Corwin (), Jadriel Delim ()}
     - 1)) = 1$. Let $D(x)$ be the corresponding decryption function such that
     $D(E(x)) = x$ for all $x \in \mathbb{Z}^{*}_n$. Suppose $eh = 1 \mod p - 1$.
     Show that $D(x) = x^h \mod p$.
+
+    \begin{proof}
+      Let $p, q \in \mathbb{Z}^{+}$ be distinct primes. Let $n \in
+      \mathbb{Z}^{+}$ such that $n = pq$.
+
+      Let $e, h \in \mathbb{Z}^{+}$ be inverses ($\mod (p - 1)$) such that $e,
+      n$ are coprime.
+
+      Suppose $E(x) = x^e \mod{n}$, and suppose $eh \equiv 1 \pmod{p - 1}$.
+      Then, suppose $D(E(x)) = x$.
+
+      Then $D(x^e \mod n) = x$.
+
+      Consider $x^h$. Since $p \mid pq, x^h \mod p \equiv x^h \mod{pq}$. Since
+      $n = pq$, $D(x^e \mod{pq}) = x$.
+
+      We supposed that $eh \equiv 1 \pmod{p - 1}$. Since $p - 1 \mid (p - 1)(q -
+      1)$, and $p \mid pq$, $D(x^e \mod{pq}) = D(x^e \mod{p}) = x$.
+
+      Since $e$ and $h$ are inverses. $D(x^e \mod{p}) = e^{en} \mod{p} = x$. So,
+      $D(x) = x^h \mod{p}$.
+    \end{proof}
   \item
     \begin{enumerate}
       \item In class we showed an attack on the plain RSA signature scheme in
@@ -147,8 +156,47 @@ Elise Corwin (), Jadriel Delim ()}
     \begin{enumerate}
       \item Describe how a signature $\left<r, s\right>$ on a message $x$ can be
         publicly verified.
+
+        \begin{proof}
+          Publicly verify $\left<r, s\right>$ on message $x$. Let $k \in
+          \mathbb{Z}^{+}$ and let $\alpha \in \mathbb{Z}_p^{*}$ be a random
+          distinct secret. Let $p, q \in \mathbb{Z}^{+}$ be distinct primes.
+
+          Since $r = (\alpha^k \pmod{p}) \pmod {q}$, we can use $\alpha^k$ to
+          find $s$. Since $s = k - rya \pmod{q}$, find $k$ to solve for
+          $\alpha^k$. By $s = k - rya, k = s + rya$.
+
+          Then
+          \begin{align*}
+            (\alpha^k \mod{p}) \mod q &= (\alpha^k \mod{p}) \mod{q}\\
+                                &= (\alpha^s \alpha^{rya} \mod{p}) \mod{q}\\
+                                &= (\alpha^k \alpha^{ry} \alpha^a \mod{p}) \mod{q}\\
+                                &= \beta (\alpha^s \alpha^{ry} \alpha^a \mod{p}) \mod{q}
+          \end{align*}
+
+          So, $r = (\beta \alpha^s \alpha^{ry} \mod{p}) \mod{q}$ exactly when
+          $\left<r, s\right> = h(x)$, thereby verifying the message.
+        \end{proof}
+
       \item Is it secure to use the same $k$ to sign two different messages and
         why?
+
+        \begin{proof}
+          Suppose the same $k$ is used to sign two different messages. Then by
+          definition, $s_1 = k - ry_1a$ and $s_2 = k - ry_2a$.
+
+          Subtract the second equation from the first to get $s_1 = s_2 = -ry_1a
+          + ry_2a = a(ry_2 - ry_1)$.
+
+          So, $a = \frac{s_1 - s_2}{r(y_2 - y_2)}$. Since $r = (\alpha^k
+          \mod{p}) \mod{q}$, the same secret key $k$ is used for the $\delta$
+          generation of the private signing key $a$ in both equations. The
+          definition of a successful attack on $\textsf{Sign}_{sk}(m, \delta)$
+          is to forge some $(m, \delta)$ pair that works such that $m \notin M$.
+          Here, we have the same $(m, \delta)$ pairs for our different messages
+          and we didn't query an oracle. So, using the same key is insecure.
+        \end{proof}
+
     \end{enumerate}
 \end{enumerate}
 
