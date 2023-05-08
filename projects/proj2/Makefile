@@ -1,30 +1,41 @@
-PROJS := proj1
-PROJS += proj2
+#  Project 2 of COMP389: Cryptography
+#  Function: Makefile
+#  File Name: Makefile
 
-PROJ1_OBJS := base64.o
-PROJ2_OBJS := pbm.o
+CC = gcc
+# -Wno-deprecated-declarations is needed to not throw warnings because MD5 is 
+#  deprecated as an insecure algorithm in OpenSSL
+CFLAGS = -Wall -Wextra -g -Wno-deprecated-declarations
+SUPPORT = Makefile README
+OBJS := proj2.o
+OBJS += pbm.o
+OBJS += stream_cipher.o
+OBJS += encrypt.o
+OBJS += bit_writer.o
 
-CC=gcc
-CFLAGS=-O1 -Wall -Wextra -pedantic
+all: proj2
 
-all: $(PROJS)
+proj2: $(OBJS)
+	$(CC) $(CFLAGS) $(OBJS) -lm -L/c/OpenSSL/lib -lssl -lcrypto -o proj2
 
-test:
-	python3 testcases.py
+stream_cipher.o: stream_cipher.c stream_cipher.h
+	$(CC) $(CFLAGS) -c stream_cipher.c
 
-proj1: proj1.c $(PROJ1_OBJS)
-	$(CC) $(CFLAGS) $(PROJ1_OBJS) proj1.c -o proj1
-
-base64.o: base64.c base64.h
-	$(CC) $(CFLAGS) -c base64.c
-
-proj2: proj2.c $(PROJ2_OBJS)
-	$(CC) $(CFLAGS) $(PROJ2_OBJS) proj2.c -o proj2
+bit_writer.o: bit_writer.c bit_writer.h
+	$(CC) $(CFLAGS) -c bit_writer.c
 
 pbm.o: pbm.c pbm.h
 	$(CC) $(CFLAGS) -c pbm.c
 
-clean:
-	-rm $(PROJS)
-	-rm $(PROJ1_OBJS)
-	-rm $(PROJ2_OBJS)
+proj2.o: proj2.c
+	$(CC) $(CLAGS) -c proj2.c
+
+encrypt.o: encrypt.c pbm.h
+	$(CC) $(CFLAGS) -c encrypt.c
+
+.PHONY: clean, package
+clean: 
+	rm *.o proj2
+
+package:
+	tar -cf *.c *.h $(SUPPORT)

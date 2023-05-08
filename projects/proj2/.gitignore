@@ -1,0 +1,6 @@
+# Compressed files
+*.zip
+*.tar.gz
+
+*.o
+proj2
