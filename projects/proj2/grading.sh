@@ -67,6 +67,8 @@ len4=724
 		diff $srcdir/bar-s$f.stream bar-s$f.stream
 	done
 
+
+exit 1
 	rm bar-s?.stream
 
 # (B) encrypt: +24 points (3 points for each correct answer)

@@ -22,7 +22,7 @@ int num_digits(int n) {
 }
 
 void encrypt_pbm_file(const struct pbm_file *file,
-                      struct stream_cipher *cipher) {
+                      struct stream_cipher_bit_reader *cipher) {
   int pbm_byte_width = pbm_width_bytes(file);
 
   // The outputs of the shares

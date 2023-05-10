@@ -50,6 +50,10 @@ int equals_index(char *input_str, int len) {
 
 struct cli_args parse_cli_args(char *args[], int num_args) {
   struct cli_args parsed_args;
+  parsed_args.len = -1;
+  parsed_args.passphrase = "";
+  parsed_args.outfile = "";
+
   for (int arg_index = 0; arg_index < num_args; arg_index++) {
     // Detect cli args by the leading dash
     if (args[arg_index][0] == '-') {
@@ -68,8 +72,8 @@ struct cli_args parse_cli_args(char *args[], int num_args) {
         }
         case 'l': {
           parsed_args.len = atoi(comparison);
-          printf("Converting to number: %d, error: %d\n", parsed_args.len,
-                 errno);
+          // printf("Converting to number: %d, error: %d\n", parsed_args.len,
+          //        errno);
           break;
         }
         }
@@ -101,13 +105,27 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
+  struct cli_args args;
   if (argc > 3) {
-    struct cli_args args = parse_cli_args(argv, argc);
-    printf("P: %s, L: %d, Out: %s\n", args.passphrase, args.len, args.outfile);
+    args = parse_cli_args(argv, argc);
+    // printf("P: %s, L: %d, Out: %s\n", args.passphrase, args.len,
+    // args.outfile);
   }
 
   switch (cmd) {
-  case ENCRYPT:
+  case STREAM: {
+    char *passphrase = args.passphrase;
+    int length = args.len;
+    FILE *outfile = stdout;
+    // printf("Passphrase is: %s, length: %d\n", passphrase, length);
+    int output = stream(passphrase, length, outfile);
+    if (output != 0) {
+      printf("Error while encrypting stream cipher\n");
+      return EXIT_FAILURE;
+    }
+    break;
+  }
+  case ENCRYPT: {
     if (argc < 5) {
       usage();
       return EXIT_FAILURE;
@@ -139,11 +157,17 @@ int main(int argc, char *argv[]) {
     char *test_pass = "yesnomaybe";
     int pass_len = strlen(test_pass);
 
-    struct stream_cipher *cipher = stream_cipher_create(test_pass, pass_len);
+    struct stream_cipher *cipher = stream_cipher_create(test_pass);
 
     // display_pbm_file(infile);
 
     encrypt_pbm_file(infile, cipher);
+    break;
+  }
+  case MERGE:
+    break;
+  case DECRYPT:
+    break;
   }
 
   return EXIT_SUCCESS;

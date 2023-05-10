@@ -12,6 +12,7 @@ OBJS += pbm.o
 OBJS += stream_cipher.o
 OBJS += encrypt.o
 OBJS += bit_writer.o
+OBJS += fns.o
 
 all: proj2
 
@@ -32,6 +33,9 @@ proj2.o: proj2.c
 
 encrypt.o: encrypt.c pbm.h
 	$(CC) $(CFLAGS) -c encrypt.c
+
+fns.o: fns.c fns.h
+	$(CC) $(CFLAGS) -c fns.c
 
 .PHONY: clean, package
 clean: 
